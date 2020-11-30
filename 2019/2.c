@@ -71,7 +71,6 @@ int run_intcode(const int program_length, int *buffer)
             break;
         default:
             return -1;
-            break;
         }
 
         position += 4;
