@@ -64,11 +64,62 @@ int part1(int low, int high)
     return valid_count;
 }
 
+// Returns -1 if failed
+int part2(int low, int high)
+{
+    int valid_count = 0;
+
+    for(int i = low; i <= high; ++i)
+    {
+        const int digits = 6;
+        char num[digits];
+
+        // Convert to string
+        int numlen = num2str(i, digits, num);
+        if(numlen == -1)
+        {
+            return -1;
+        }
+
+        // Evaluate decreasing criteria
+        int is_decrease = 0;
+        for(int j = 1; j < digits; ++j)
+        {
+            if(num[j] < num[j-1])
+            {
+                is_decrease = 1;
+            }
+        }
+
+        // Evaluate double criteria and update result counter
+        if(num[0] == num[1] && num[1] != num[2])
+        {
+            valid_count += (!is_decrease);
+            continue;
+        }
+        if(num[numlen - 1] == num[numlen - 2] && num[numlen - 2] != num[numlen - 3])
+        {
+            valid_count += (!is_decrease);
+            continue;
+        }
+        for(int j = 1; j < 4; ++j)
+        {
+            if(num[j - 1] != num[j] && num[j] == num[j + 1] && num[j + 1] != num[j + 2])
+            {
+                valid_count += (!is_decrease);
+                break;
+            }
+        }
+    }
+
+    return valid_count;
+}
+
 int main()
 {
     int low = 165432;
     int high = 707912;
     printf("Part 1: %d\n", part1(low, high));
-    //printf("Part 2: %d\n", part2());
+    printf("Part 2: %d\n", part2(low, high));
     return 0;
 }
