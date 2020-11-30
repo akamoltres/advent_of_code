@@ -52,6 +52,33 @@ int read_intcode(const int bufsize, int *buffer, char *filename)
     }
 }
 
+// Returns 0 if program terminated successfully (opcode 99)
+// Returns -1 if program terminated unexpectedly
+int run_intcode(const int program_length, int *buffer)
+{
+    int position = 0;
+
+    while(buffer[position] != 99)
+    {
+        switch(buffer[position])
+        {
+        case 1: // add
+            buffer[buffer[position + 3]] = buffer[buffer[position + 1]] + buffer[buffer[position + 2]];
+            break;
+        case 2: // multiply
+            buffer[buffer[position + 3]] = buffer[buffer[position + 1]] * buffer[buffer[position + 2]];
+            break;
+        default:
+            return -1;
+            break;
+        }
+
+        position += 4;
+    }
+
+    return 0;
+}
+
 int part1()
 {
     const int bufsize = 200;
@@ -59,7 +86,12 @@ int part1()
 
     int program_length = read_intcode(bufsize, buffer, "2.txt");
 
-    return 0;
+    buffer[1] = 12;
+    buffer[2] = 2;
+
+    (void) run_intcode(program_length, buffer);
+
+    return buffer[0];
 }
 
 int main()
