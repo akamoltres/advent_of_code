@@ -7,4 +7,4 @@ int read_intcode(const int bufsize, int *buffer, char *filename);
 
 // Returns 0 if program terminated successfully (opcode 99)
 // Returns -1 if program terminated unexpectedly
-int run_intcode(const int program_length, int *buffer);
+int run_intcode(const int program_length, int *buffer, const int input_length, int *input_buffer);

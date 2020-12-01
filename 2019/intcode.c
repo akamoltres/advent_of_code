@@ -20,8 +20,15 @@ int read_intcode(const int bufsize, int *buffer, char *filename)
     {
         int value = 0;
         char c[2];
+        int negative = 0;
         while(fgets(c, 2, fp))
         {
+            if(c[0] == '-')
+            {
+                negative = 1;
+                continue;
+            }
+
             if(c[0] == ',')
             {
                 break;
@@ -36,7 +43,7 @@ int read_intcode(const int bufsize, int *buffer, char *filename)
             value = (value * 10) + (c[0] - '0');
         }
 
-        buffer[program_length++] = value;
+        buffer[program_length++] = value * (negative ? -1 : 1);
 
         if(done)
         {
@@ -51,25 +58,56 @@ int read_intcode(const int bufsize, int *buffer, char *filename)
     }
 }
 
-int run_intcode(const int program_length, int *buffer)
+int run_intcode(const int program_length, int *buffer, const int input_length, int *input_buffer)
 {
     int position = 0;
+    int current_input = 0;
 
     while(buffer[position] != 99)
     {
-        switch(buffer[position])
+        int mode1 = (buffer[position] % 1000) / 100;
+        int mode2 = (buffer[position] % 10000) / 1000;
+        switch(buffer[position] % 100)
         {
-        case 1: // add
-            buffer[buffer[position + 3]] = buffer[buffer[position + 1]] + buffer[buffer[position + 2]];
-            break;
-        case 2: // multiply
-            buffer[buffer[position + 3]] = buffer[buffer[position + 1]] * buffer[buffer[position + 2]];
-            break;
-        default:
-            return -1;
+            case 1: // add
+            {
+                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
+                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
+                buffer[buffer[position + 3]] = param1 + param2;
+                position += 4;
+                break;
+            }
+            case 2: // multiply
+            {
+                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
+                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
+                buffer[buffer[position + 3]] = param1 * param2;
+                position += 4;
+                break;
+            }
+            case 3: // input
+            {
+                if(current_input == input_length)
+                {
+                    return -1;
+                }
+                buffer[buffer[position + 1]] = input_buffer[current_input++];
+                position += 2;
+                break;
+            }
+            case 4: // output
+            {
+                int param = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
+                printf("Intcode program output: %d\n", param);
+                position += 2;
+                break;
+            }
+            default:
+            {
+                return -1;
+            }
         }
 
-        position += 4;
     }
 
     return 0;

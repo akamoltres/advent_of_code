@@ -14,7 +14,7 @@ int part1()
     buffer[1] = 12;
     buffer[2] = 2;
 
-    (void) run_intcode(program_length, buffer);
+    (void) run_intcode(program_length, buffer, 0, NULL);
 
     return buffer[0];
 }
@@ -37,7 +37,7 @@ int part2()
             memcpy(test_program, buffer, sizeof(int) * bufsize);
             test_program[1] = noun;
             test_program[2] = verb;
-            (void) run_intcode(program_length, test_program);
+            (void) run_intcode(program_length, test_program, 0, NULL);
             if(test_program[0] == desired_output)
             {
                 return noun * 100 + verb;
