@@ -1,7 +1,18 @@
 
-#include "intcode.h"
-
 #include <stdio.h>
+
+void print_program(int program_length, int *buffer)
+{
+    if(program_length > 0)
+    {
+        printf("%d\n", buffer[0]);
+        for(int i = 1; i < program_length; ++i)
+        {
+            printf(" %d", buffer[i]);
+        }
+        printf("\n");
+    }
+}
 
 int read_intcode(const int bufsize, int *buffer, char *filename)
 {
@@ -58,7 +69,7 @@ int read_intcode(const int bufsize, int *buffer, char *filename)
     }
 }
 
-int run_intcode(const int program_length, int *buffer, const int input_length, int *input_buffer)
+int run_intcode(const int program_length, const int bufsize, int *buffer, const int input_length, int *input_buffer)
 {
     int position = 0;
     int current_input = 0;
@@ -102,12 +113,60 @@ int run_intcode(const int program_length, int *buffer, const int input_length, i
                 position += 2;
                 break;
             }
+            case 5: // jump if true
+            {
+                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
+                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
+                if(param1)
+                {
+                    position = param2;
+                }
+                else
+                {
+                    position += 3;
+                }
+                break;
+            }
+            case 6: // jump if false
+            {
+                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
+                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
+                if(!param1)
+                {
+                    position = param2;
+                }
+                else
+                {
+                    position += 3;
+                }
+                break;
+            }
+            case 7: // less than
+            {
+                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
+                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
+                buffer[buffer[position + 3]] = (param1 < param2);
+                position += 4;
+                break;
+            }
+            case 8: // equals
+            {
+                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
+                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
+                buffer[buffer[position + 3]] = (param1 == param2);
+                position += 4;
+                break;
+            }
             default:
             {
                 return -1;
             }
         }
 
+        if(position >= bufsize)
+        {
+            return -1;
+        }
     }
 
     return 0;
