@@ -39,7 +39,7 @@ Pair_t get_input(const int bufsize, char buffer[BUFSIZE][BUFSIZE])
 }
 
 // Returns -1 if failed unexpectedly
-int part1()
+int part1(int right_count, int down_count)
 {
     const int bufsize = BUFSIZE;
     char buffer[bufsize][bufsize];
@@ -53,19 +53,36 @@ int part1()
     int tree_count = 0;
     int cpos = 0;
 
-    for(int rpos = 0; rpos < dim.num_rows; ++rpos)
+    for(int rpos = 0; rpos < dim.num_rows; rpos += down_count)
     {
         if(buffer[rpos][cpos] == '#')
         {
             tree_count += 1;
         }
-        cpos = (cpos + 3) % dim.num_cols;
+        cpos = (cpos + right_count) % dim.num_cols;
     }
 
     return tree_count;
 }
 
+long part2()
+{
+    long a = part1(1, 1);
+    long b = part1(3, 1);
+    long c = part1(5, 1);
+    long d = part1(7, 1);
+    long e = part1(1, 2);
+
+    if(a == -1 || b == -1 || c == -1 || d == -1 || e == -1)
+    {
+        return -1;
+    }
+
+    return (a * b * c * d * e);
+}
+
 int main()
 {
-    printf("Part 1: %d\n", part1());
+    printf("Part 1: %d\n", part1(3, 1));
+    printf("Part 2: %ld\n", part2());
 }
