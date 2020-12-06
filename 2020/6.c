@@ -129,7 +129,46 @@ int part1()
     return sum;
 }
 
+// Returns -1 if failed unexpectedly
+int part2()
+{
+    const int bufsize = BUFSIZE;
+    Group_t buffer[bufsize];
+
+    int num_groups = get_input(bufsize, buffer);
+    if(num_groups == -1)
+    {
+        return -1;
+    }
+
+    int sum = 0;
+
+    for(int i = 0; i < num_groups; ++i)
+    {
+        int responses[MAX_RESPONSES] = {0};
+
+        for(int j = 0; j < buffer[i].num_people; ++j)
+        {
+            for(int k = 0; k < buffer[i].response_lengths[j]; ++k)
+            {
+                responses[buffer[i].responses[j][k] - 'a'] += 1;
+            }
+        }
+
+        for(int j = 0; j < MAX_RESPONSES; ++j)
+        {
+            if(responses[j] == buffer[i].num_people)
+            {
+                sum += 1;
+            }
+        }
+    }
+
+    return sum;
+}
+
 int main()
 {
     printf("Part 1: %d\n", part1());
+    printf("Part 2: %d\n", part2());
 }
