@@ -3,7 +3,7 @@
 #include <string.h>
 
 #define BUFSIZE 1000
-#define QUEUE_SIZE 1000000
+#define QUEUE_SIZE 1000
 #define MAX_DESC_LENGTH 20
 
 typedef struct Description
@@ -218,7 +218,57 @@ int part1()
     return shiny_gold_count;
 }
 
+// There's probably a more efficient way to do this that I once knew,
+// but it's midnight and I don't care, so recursion with memoization will have to do. 
+int count_bags(int num_bag_types, int count[BUFSIZE][BUFSIZE], int stored[BUFSIZE], int query)
+{
+    if(stored[query] != -1)
+    {
+        return stored[query];
+    }
+
+    stored[query] = 0;
+    for(int i = 0; i < num_bag_types; ++i)
+    {
+        if(count[query][i])
+        {
+            stored[query] += count[query][i] * count_bags(num_bag_types, count, stored, i) + count[query][i];
+        }
+    }
+
+    return stored[query];
+}
+
+// Returns -1 if failed unexpectedly
+int part2()
+{
+    Description_t key[BUFSIZE];
+    int count[BUFSIZE][BUFSIZE] = {0};
+    int stored[BUFSIZE];
+    for(int i = 0; i < BUFSIZE; ++i)
+    {
+        stored[i] = -1;
+    }
+
+    int num_bag_types = read_input(key, count);
+    if(num_bag_types == -1)
+    {
+        return -1;
+    }
+
+    // Get the starting point
+    Description_t shiny_gold = {
+        .adj = "shiny",
+        .col = "gold",
+    };
+    int index_shiny_gold = index_of(num_bag_types, key, &shiny_gold);
+
+    // Boy do I love shipping production code with recursion
+    return count_bags(num_bag_types, count, stored, index_shiny_gold);
+}
+
 int main()
 {
     printf("Part 1: %d\n", part1());
+    printf("Part 2: %d\n", part2());
 }
