@@ -351,9 +351,16 @@ int part2(char *input_filename)
     return fewest_combined_steps;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    char filename[] = "3.txt";
-    printf("Part 1: %d\n", part1(filename));
-    printf("Part 2: %d\n", part2(filename));
+    if(argc != 2)
+    {
+        printf("Exactly 1 argument (input file) required\n");
+        return -1;
+    }
+
+    printf("Part 1: %d\n", part1(argv[1]));
+    printf("Part 2: %d\n", part2(argv[1]));
+
+    return 0;
 }

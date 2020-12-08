@@ -1,13 +1,13 @@
 
 #include <stdio.h>
 
-unsigned long part1()
+unsigned long part1(char *input_filename)
 {
     unsigned long total_fuel = 0;
     unsigned long module_mass = 0;
 
     FILE *fp;
-    fp = fopen("1.txt", "r");
+    fp = fopen(input_filename, "r");
     while(fscanf(fp, "%lu", &module_mass) == 1)
     {
         total_fuel += module_mass / 3 - 2;
@@ -17,13 +17,13 @@ unsigned long part1()
     return total_fuel;
 }
 
-long part2()
+long part2(char *input_filename)
 {
     unsigned long total_fuel = 0;
     unsigned long module_mass = 0;
 
     FILE *fp;
-    fp = fopen("1.txt", "r");
+    fp = fopen(input_filename, "r");
     while(fscanf(fp, "%lu", &module_mass) == 1)
     {
         long fuel_to_add = module_mass / 3 - 2;
@@ -38,9 +38,16 @@ long part2()
     return total_fuel;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    printf("Part 1: %lu\n", part1());
-    printf("Part 2: %ld\n", part2());
+    if(argc != 2)
+    {
+        printf("Exactly 1 argument (input file) required\n");
+        return -1;
+    }
+
+    printf("Part 1: %lu\n", part1(argv[1]));
+    printf("Part 2: %ld\n", part2(argv[1]));
+
     return 0;
 }

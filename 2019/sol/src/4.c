@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 
 // Converts num to string in the provided buffer and returns the number of digits
 // Returns -1 if failed
@@ -115,11 +116,19 @@ int part2(int low, int high)
     return valid_count;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    int low = 165432;
-    int high = 707912;
+    if(argc != 3)
+    {
+        printf("Exactly 2 arguments (password range) required\n");
+        return -1;
+    }
+
+    int low = atoi(argv[1]);
+    int high = atoi(argv[2]);
+
     printf("Part 1: %d\n", part1(low, high));
     printf("Part 2: %d\n", part2(low, high));
+
     return 0;
 }
