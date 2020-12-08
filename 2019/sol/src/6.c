@@ -14,12 +14,12 @@ typedef struct Relation
 } Relation_t;
 
 // Returns -1 if failed unexpectedly
-int read_orbits(int bufsize, Relation_t *buffer)
+int read_orbits(int bufsize, Relation_t *buffer, char *input_filename)
 {
     int num_orbits = 0;
 
     FILE *fp;
-    fp = fopen("6.txt", "r");
+    fp = fopen(input_filename, "r");
 
     if(fp == NULL)
     {
@@ -104,13 +104,13 @@ int count_indirect_orbits(const int bufsize, Relation_t *buffer, int index)
 }
 
 // Returns -1 if unexpected failure
-int part1()
+int part1(char *input_filename)
 {
     const int bufsize = 5000;
     Relation_t buffer[bufsize];
     memset(buffer, 0, bufsize * sizeof(Relation_t));
 
-    int total_direct_orbits = read_orbits(bufsize, buffer);
+    int total_direct_orbits = read_orbits(bufsize, buffer, input_filename);
 
     if(total_direct_orbits == -1)
     {
@@ -180,13 +180,13 @@ int build_chain(const int bufsize, Relation_t *buffer, int *chain_buffer)
 }
 
 // Returns -1 if unexpected failure
-int part2()
+int part2(char *input_filename)
 {
     const int bufsize = 5000;
     Relation_t buffer[bufsize];
     memset(buffer, 0, bufsize * sizeof(Relation_t));
 
-    int total_direct_orbits = read_orbits(bufsize, buffer);
+    int total_direct_orbits = read_orbits(bufsize, buffer, input_filename);
 
     if(total_direct_orbits == -1)
     {
@@ -235,9 +235,16 @@ int part2()
     return -1;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    printf("Part 1: %d\n", part1());
-    printf("Part 2: %d\n", part2());
+    if(argc != 2)
+    {
+        printf("Exactly 1 argument (input file) required\n");
+        return -1;
+    }
+
+    printf("Part 1: %d\n", part1(argv[1]));
+    printf("Part 2: %d\n", part2(argv[1]));
+
     return 0;
 }

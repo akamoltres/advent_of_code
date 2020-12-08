@@ -4,12 +4,17 @@
 #include <stdio.h>
 #include <string.h>
 
-int part1()
+// Returns -1 if failed
+int part1(char *input_filename)
 {
     const int bufsize = 200;
     int buffer[bufsize];
 
-    int program_length = read_intcode(bufsize, buffer, "2.txt");
+    int program_length = read_intcode(bufsize, buffer, input_filename);
+    if(program_length < 0)
+    {
+        return program_length;
+    }
 
     buffer[1] = 12;
     buffer[2] = 2;
@@ -20,12 +25,16 @@ int part1()
 }
 
 // Returns -1 if failed
-int part2()
+int part2(char *input_filename)
 {
     const int bufsize = 200;
     int buffer[bufsize];
 
-    int program_length = read_intcode(bufsize, buffer, "2.txt");
+    int program_length = read_intcode(bufsize, buffer, input_filename);
+    if(program_length < 0)
+    {
+        return program_length;
+    }
 
     const int desired_output = 19690720;
 
@@ -48,8 +57,16 @@ int part2()
     return -1;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    printf("Part 1: %d\n", part1());
-    printf("Part 2: %d\n", part2());
+    if(argc != 2)
+    {
+        printf("Exactly 1 argument (input file) required\n");
+        return -1;
+    }
+
+    printf("Part 1: %d\n", part1(argv[1]));
+    printf("Part 2: %d\n", part2(argv[1]));
+
+    return 0;
 }
