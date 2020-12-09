@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    printf("Part 1: %lu\n", part1(argv[1]));
-    printf("Part 2: %ld\n", part2(argv[1]));
+    printf("Part 1: %d\n", part1(argv[1]));
+    printf("Part 2: %d\n", part2(argv[1]));
 
     return 0;
 }
