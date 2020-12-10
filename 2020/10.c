@@ -1,4 +1,5 @@
 
+#include <assert.h>
 #include <stdio.h>
 
 int read_input(char *input_filename, const int bufsize, int *buffer)
@@ -61,9 +62,36 @@ int part1(char *input_filename)
     return (count[1] * count[3]);
 }
 
-int part2(char *input_filename)
+long part2(char *input_filename)
 {
-    return -1;
+    const int bufsize = 1000;
+    int buffer[bufsize];
+    long count[bufsize];
+
+    int list_length = read_input(input_filename, bufsize, buffer);
+    if(list_length == -1)
+    {
+        return -1;
+    }
+
+    sort(list_length, buffer);
+
+    int device_joltage = buffer[list_length - 1] + 3;
+    assert(buffer[list_length -1] + 3 < bufsize);
+
+    count[0] = 1;
+    count[1] = 1;
+    count[2] = 1;
+    count[3] = 1;
+
+    for(int i = 0; i < list_length; ++i)
+    {
+        count[buffer[i] + 1] += count[buffer[i]];
+        count[buffer[i] + 2] += count[buffer[i]];
+        count[buffer[i] + 3] += count[buffer[i]];
+    }
+
+    return count[device_joltage];
 }
 
 int main(int argc, char *argv[])
@@ -75,7 +103,7 @@ int main(int argc, char *argv[])
     }
 
     printf("Part 1: %d\n", part1(argv[1]));
-    // printf("Part 2: %d\n", part2(argv[1]));
+    printf("Part 2: %ld\n", part2(argv[1]));
 
     return 0;
 }
