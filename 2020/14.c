@@ -130,9 +130,112 @@ uint64_t part1(char *input_filename)
     return sum;
 }
 
-int part2(char *input_filename)
+uint64_t memory_idx(uint64_t mem_length, uint64_t *memory, uint64_t value)
 {
+    for(int i = 0; i < mem_length; ++i)
+    {
+        if(memory[i] == value)
+        {
+            return i;
+        }
+    }
+
     return -1;
+}
+
+uint64_t part2(char *input_filename)
+{
+    Cmd_t buffer[BUFSIZE];
+
+    int num_cmds = get_input(input_filename, buffer);
+    if(num_cmds == -1)
+    {
+        return -1;
+    }
+
+    uint64_t memory_addrs[MEMORY_SIZE];
+    uint64_t memory[MEMORY_SIZE];
+    uint64_t mem_length = 0;
+
+    char bitmask[ADDR_SIZE + 1] = {0};
+
+    for(int i = 0; i < num_cmds; ++i)
+    {
+        if(buffer[i].type == MASK)
+        {
+            strcpy(bitmask, buffer[i].bitmask);
+        }
+        else if(buffer[i].type == MEM)
+        {
+            char addr_mask[ADDR_SIZE + 1] = {0};
+            uint64_t num_addrs = 1;
+            for(int j = 0; j < ADDR_SIZE; ++j)
+            {
+                if(bitmask[j] == 'X')
+                {
+                    addr_mask[j] = 'X';
+                    num_addrs <<= 1;
+                }
+                else
+                {
+                    addr_mask[j] = ((((buffer[i].addr >> (ADDR_SIZE - j - 1)) & 0b1) | (bitmask[j] - '0')) ? '1' : '0');
+                }
+            }
+
+            for(int j = 0; j < num_addrs; ++j)
+            {
+                uint64_t floating_bits = j;
+                uint64_t addr = 0;
+
+                for(int k = 0; k < ADDR_SIZE; ++k)
+                {
+                    uint64_t bit;
+
+                    if(addr_mask[k] == 'X')
+                    {
+                        bit = (floating_bits & 0b1);
+                        floating_bits >>= 1;
+                    }
+                    else
+                    {
+                        bit = (addr_mask[k] - '0');
+                    }
+
+                    addr = (addr << 1) | bit;
+                }
+
+                uint64_t index = memory_idx(mem_length, memory_addrs, addr);
+
+                if(index == -1)
+                {
+                    if(mem_length == MEMORY_SIZE)
+                    {
+                        return -1;
+                    }
+
+                    memory_addrs[mem_length] = addr;
+                    memory[mem_length] = buffer[i].value;
+                    mem_length += 1;
+                }
+                else
+                {
+                    memory[index] = buffer[i].value;
+                }
+            }
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    uint64_t sum = 0;
+    for(uint64_t i = 0; i < mem_length; ++i)
+    {
+        sum += memory[i];
+    }
+
+    return sum;
 }
 
 int main(int argc, char *argv[])
@@ -144,7 +247,7 @@ int main(int argc, char *argv[])
     }
 
     printf("Part 1: %lu\n", part1(argv[1]));
-    printf("Part 2: %d\n", part2(argv[1]));
+    printf("Part 2: %lu\n", part2(argv[1]));
 
     return 0;
 }
