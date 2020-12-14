@@ -56,3 +56,6 @@ build/
 
 # Tags
 tags
+
+# Swap
+*.swp
