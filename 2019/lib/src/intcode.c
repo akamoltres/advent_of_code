@@ -17,7 +17,7 @@ void print_program(int program_length, int *buffer)
     }
 }
 
-int read_intcode(const int bufsize, int *buffer, char *filename)
+int read_intcode(const int bufsize, int *buffer, const char *filename)
 {
     int program_length = 0;
 

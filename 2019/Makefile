@@ -1,7 +1,7 @@
 CC=gcc
 CXX=g++
 CFLAGS=-Ilib/include/ -Isol/include/ -Wall -Werror
-CPPFLAGS=-I/usr/include/CppUTest/ $(CFLAGS)
+CPPFLAGS=-I/usr/include/CppUTest/ -Itest/ $(CFLAGS)
 LD_LIBRARIES=-L/usr/lib/x86_64-linux-gnu/ -lCppUTest
 DEPS=$(wildcard lib/include) $(wildcard sol/include)
 
