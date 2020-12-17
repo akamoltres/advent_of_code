@@ -24,7 +24,7 @@ test: build_dir $(TEST_OBJ_FILES) $(SOL_OBJ_FILES) $(LIB_OBJ_FILES)
 
 .PHONY: clean
 clean:
-	@rm -r $(BUILD_DIR)
+	@rm -rf $(BUILD_DIR)
 
 %.o: %.c $(DEPS)
 	@$(CC) -c -o $(BUILD_DIR)/$(notdir $@) $< $(CFLAGS)
