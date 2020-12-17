@@ -28,8 +28,20 @@ int num2str(int num, const int bufsize, char *buffer)
 }
 
 // Returns -1 if failed
-int part1(int low, int high)
+int solve_2019_4_1(char const *input_filename)
 {
+    FILE *fp = fopen(input_filename, "r");
+    if(fp == NULL)
+    {
+        return -1;
+    }
+
+    int low, high;
+    fscanf(fp, "%d", &low);
+    fscanf(fp, "%d", &high);
+
+    fclose(fp);
+
     int valid_count = 0;
 
     for(int i = low; i <= high; ++i)
@@ -66,8 +78,20 @@ int part1(int low, int high)
 }
 
 // Returns -1 if failed
-int part2(int low, int high)
+int solve_2019_4_2(char const *input_filename)
 {
+    FILE *fp = fopen(input_filename, "r");
+    if(fp == NULL)
+    {
+        return -1;
+    }
+
+    int low, high;
+    fscanf(fp, "%d", &low);
+    fscanf(fp, "%d", &high);
+
+    fclose(fp);
+
     int valid_count = 0;
 
     for(int i = low; i <= high; ++i)
@@ -116,7 +140,7 @@ int part2(int low, int high)
     return valid_count;
 }
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
     if(argc != 3)
     {
@@ -131,4 +155,4 @@ int main(int argc, char *argv[])
     printf("Part 2: %d\n", part2(low, high));
 
     return 0;
-}
+}*/

@@ -173,7 +173,7 @@ int read_wire_files(char *filename,
 }
 
 // Returns -1 if failed
-int part1(char *input_filename)
+int solve_2019_3_1(char *input_filename)
 {
     const int bufsize = 500;
     int wire1_length;
@@ -284,7 +284,7 @@ int walk_wire(const int wire_length, Segment_t *wire,
 }
 
 // Returns -1 if failed
-int part2(char *input_filename)
+int solve_2019_3_2(char *input_filename)
 {
     const int bufsize = 500;
     int wire1_length;
@@ -351,7 +351,7 @@ int part2(char *input_filename)
     return fewest_combined_steps;
 }
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
     if(argc != 2)
     {
@@ -363,4 +363,4 @@ int main(int argc, char *argv[])
     printf("Part 2: %d\n", part2(argv[1]));
 
     return 0;
-}
+}*/
