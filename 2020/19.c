@@ -104,6 +104,12 @@ void build_rule_id_lookup(int num_rules, Rule_t rules[MAX_RULES], int rule_id_lo
 
 int msg_match(char *message, int msg_idx, int rule_index, Rule_t rules[MAX_RULES], int rule_id_lookup[MAX_RULES])
 {
+    // length check
+    if(msg_idx >= strlen(message))
+    {
+        return 0;
+    }
+
     // base case
     if(rules[rule_index].type == 1)
     {
@@ -157,7 +163,35 @@ int part1(char *input_filename)
 
 int part2(char *input_filename)
 {
-    return -1;
+    int num_rules;
+    Rule_t rules[MAX_RULES];
+    int rule_id_lookup[MAX_RULES];
+    int num_messages;
+    char messages[MAX_MSG][MAX_STR_LEN];
+    memset(messages, 0, MAX_MSG * MAX_STR_LEN * sizeof(char));
+
+    get_input(input_filename, &num_rules, rules, &num_messages, messages);
+    build_rule_id_lookup(num_rules, rules, rule_id_lookup);
+
+    rules[rule_id_lookup[8]].num_patterns = 2;
+    rules[rule_id_lookup[8]].pattern_size[1] = 2;
+    rules[rule_id_lookup[8]].pattern[1][0] = 42;
+    rules[rule_id_lookup[8]].pattern[1][1] = 8;
+
+    rules[rule_id_lookup[11]].num_patterns = 2;
+    rules[rule_id_lookup[11]].pattern_size[1] = 3;
+    rules[rule_id_lookup[11]].pattern[1][0] = 42;
+    rules[rule_id_lookup[11]].pattern[1][1] = 11;
+    rules[rule_id_lookup[11]].pattern[1][2] = 31;
+
+    int count = 0;
+
+    for(int i = 0; i < num_messages; ++i)
+    {
+        count += (msg_match(messages[i], 0, rule_id_lookup[0], rules, rule_id_lookup) == strlen(messages[i]));
+    }
+
+    return count;
 }
 
 int main(int argc, char *argv[])
