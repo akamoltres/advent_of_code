@@ -96,44 +96,31 @@ int ingr_is_matched(int aller_src[MAX_NUM_ITEM], int num_allers, int ingr_idx)
     return 0;
 }
 
-int part1(char *input_filename)
+void build_lists_from_foods(int num_foods, Food_t foods[MAX_NUM_FOODS],
+                            int *num_ingrs, char ingrs[MAX_NUM_ITEM][MAX_ITEM_LEN],
+                            int *num_allers, char allers[MAX_NUM_ITEM][MAX_ITEM_LEN])
 {
-    // init
-    int num_foods = 0;
-    Food_t foods[MAX_NUM_FOODS];
-
-    int num_ingrs = 0;
-    char ingrs[MAX_NUM_ITEM][MAX_ITEM_LEN];
-    memset(ingrs, 0, MAX_NUM_ITEM * MAX_ITEM_LEN * sizeof(char));
-
-    int num_allers = 0;
-    char allers[MAX_NUM_ITEM][MAX_ITEM_LEN];
-    memset(allers, 0, MAX_NUM_ITEM * MAX_ITEM_LEN * sizeof(char));
-
-    int aller_src[MAX_NUM_ITEM];
-    for(int i = 0; i < MAX_NUM_ITEM; ++i)
-    {
-        aller_src[i] = -1;
-    }
-
-    // input
-    num_foods = get_input(input_filename, foods);
-
-    // build lists of ingredients and allergens
     for(int i = 0; i < num_foods; ++i)
     {
         for(int j = 0; j < foods[i].num_ingr; ++j)
         {
-            assert(add_item_if_missing(ingrs, &num_ingrs, foods[i].ingr[j]) < MAX_NUM_ITEM);
+            assert(add_item_if_missing(ingrs, num_ingrs, foods[i].ingr[j]) < MAX_NUM_ITEM);
         }
 
         for(int j = 0; j < foods[i].num_aller; ++j)
         {
-            assert(add_item_if_missing(allers, &num_allers, foods[i].aller[j]) < MAX_NUM_ITEM);
+            assert(add_item_if_missing(allers, num_allers, foods[i].aller[j]) < MAX_NUM_ITEM);
         }
     }
+}
 
-    // match each allergen to an ingredient
+int match_allers_to_ingrs(int num_foods, Food_t foods[MAX_NUM_FOODS],
+                          int num_allers, char allers[MAX_NUM_ITEM][MAX_ITEM_LEN],
+                          int num_ingrs, char ingrs[MAX_NUM_ITEM][MAX_ITEM_LEN],
+                          int aller_src[MAX_NUM_ITEM])
+{
+    int allers_matched = 0;
+
     for(int try = 0; try < num_allers; ++try)
     {
         for(int i = 0; i < num_allers; ++i)
@@ -211,11 +198,47 @@ int part1(char *input_filename)
             if(candidate >= 0)
             {
                 aller_src[i] = candidate;
+                allers_matched += 1;
             }
         }
     }
 
-    // count the hypoallergenic ingredients
+    return allers_matched;
+}
+
+int part1(char *input_filename)
+{
+    // init
+    int num_foods = 0;
+    Food_t foods[MAX_NUM_FOODS];
+
+    int num_ingrs = 0;
+    char ingrs[MAX_NUM_ITEM][MAX_ITEM_LEN];
+    memset(ingrs, 0, MAX_NUM_ITEM * MAX_ITEM_LEN * sizeof(char));
+
+    int num_allers = 0;
+    char allers[MAX_NUM_ITEM][MAX_ITEM_LEN];
+    memset(allers, 0, MAX_NUM_ITEM * MAX_ITEM_LEN * sizeof(char));
+
+    int aller_src[MAX_NUM_ITEM];
+    for(int i = 0; i < MAX_NUM_ITEM; ++i)
+    {
+        aller_src[i] = -1;
+    }
+
+    // input
+    num_foods = get_input(input_filename, foods);
+
+    // build lists of ingredients and allergens
+    build_lists_from_foods(num_foods, foods, &num_ingrs, ingrs, &num_allers, allers);
+
+    // match each allergen to an ingredient
+    assert(match_allers_to_ingrs(num_foods, foods,
+                          num_allers, allers,
+                          num_ingrs, ingrs,
+                          aller_src) == num_allers);
+
+    // count the instances of hypoallergenic ingredients
     int hypo_count = 0;
     for(int i = 0; i < num_foods; ++i)
     {
@@ -252,100 +275,13 @@ void part2(char *input_filename, char retval[MAX_RETVAL_LEN])
     num_foods = get_input(input_filename, foods);
 
     // build lists of ingredients and allergens
-    for(int i = 0; i < num_foods; ++i)
-    {
-        for(int j = 0; j < foods[i].num_ingr; ++j)
-        {
-            assert(add_item_if_missing(ingrs, &num_ingrs, foods[i].ingr[j]) < MAX_NUM_ITEM);
-        }
-
-        for(int j = 0; j < foods[i].num_aller; ++j)
-        {
-            assert(add_item_if_missing(allers, &num_allers, foods[i].aller[j]) < MAX_NUM_ITEM);
-        }
-    }
+    build_lists_from_foods(num_foods, foods, &num_ingrs, ingrs, &num_allers, allers);
 
     // match each allergen to an ingredient
-    for(int try = 0; try < num_allers; ++try)
-    {
-        for(int i = 0; i < num_allers; ++i)
-        {
-            int candidates[MAX_NUM_ITEM];
-            memset(candidates, 0, MAX_NUM_ITEM * sizeof(int));
-
-            int first = 1;
-
-            // walk through the foods
-            for(int j = 0; j < num_foods; ++j)
-            {
-                // walk through the allergens in the food
-                for(int k = 0; k < foods[j].num_aller; ++k)
-                {
-                    // if the allergen is the one we are currently looking at
-                    if(!strcmp(allers[i], foods[j].aller[k]))
-                    {
-                        // if it is the first instance, we have our initial list of candidates
-                        if(first)
-                        {
-                            first = 0;
-                            for(int l = 0; l < foods[j].num_ingr; ++l)
-                            {
-                                int ingr_idx = get_item_idx(ingrs, num_ingrs, foods[j].ingr[l]);
-                                if(!ingr_is_matched(aller_src, num_allers, ingr_idx))
-                                {
-                                    candidates[ingr_idx] = 1;
-                                }
-                            }
-                        }
-                        // if it is not the first instance, we can whittle down the list of candidates
-                        else
-                        {
-                            for(int l = 0; l < foods[j].num_ingr; ++l)
-                            {
-                                int ingr_idx = get_item_idx(ingrs, num_ingrs, foods[j].ingr[l]);
-                                if(candidates[ingr_idx])
-                                {
-                                    candidates[ingr_idx] = 2;
-                                }
-                            }
-                            for(int l = 0; l < num_ingrs; ++l)
-                            {
-                                if(candidates[l] == 2)
-                                {
-                                    candidates[l] = 1;
-                                }
-                                else if(candidates[l] == 1)
-                                {
-                                    candidates[l] = 0;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // there should be one candidate remaining
-            int candidate = -1;
-            for(int j = 0; j < num_ingrs; ++j)
-            {
-                if(candidates[j] == 1)
-                {
-                    if(candidate == -1)
-                    {
-                        candidate = j;
-                    }
-                    else
-                    {
-                        candidate = -2;
-                    }
-                }
-            }
-            if(candidate >= 0)
-            {
-                aller_src[i] = candidate;
-            }
-        }
-    }
+    assert(match_allers_to_ingrs(num_foods, foods,
+                          num_allers, allers,
+                          num_ingrs, ingrs,
+                          aller_src) == num_allers);
 
     // bubble sort time
     char allers_sorted[MAX_NUM_ITEM][MAX_ITEM_LEN];
