@@ -91,7 +91,7 @@ void get_input(char *input_filename,
 
 void build_rule_id_lookup(int num_rules, Rule_t rules[MAX_RULES], int rule_id_lookup[MAX_RULES])
 {
-    for(int i = 0; i < num_rules; ++i)
+    for(int i = 0; i < MAX_RULES; ++i)
     {
         rule_id_lookup[i] = -1;
     }
@@ -161,6 +161,63 @@ int part1(char *input_filename)
     return count;
 }
 
+// returns 1 if matched successfully, 0 otherwise
+int msg_match2(char *message,
+               int rule_list[MAX_STR_LEN], int rule_list_len,
+               Rule_t rules[MAX_RULES], int rule_id_lookup[MAX_RULES])
+{
+
+    for(int i = 0; i < rule_list_len; ++i)
+    {
+        Rule_t rule = rules[rule_id_lookup[rule_list[i]]];
+        if(rule.type == 1)
+        {
+            if(message[i] != rule.c)
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            // try expanding the rule into one of its constituent patterns
+            // at a time, and continue the search
+            for(int j = 0; j < rule.num_patterns; ++j)
+            {
+                if(rule_list_len + rule.pattern_size[j] - 1 <= strlen(message))
+                {
+                    assert(rule_list_len + rule.pattern_size[j] - 1 <= MAX_STR_LEN);
+                    int rule_list_new[MAX_STR_LEN] = {0};
+                    for(int k = 0; k < i; ++k)
+                    {
+                        rule_list_new[k] = rule_list[k];
+                    }
+                    for(int k = 0; k < rule.pattern_size[j]; ++k)
+                    {
+                        rule_list_new[i + k] = rule.pattern[j][k];
+                    }
+                    for(int k = i + rule.pattern_size[j]; k < MAX_STR_LEN; ++k)
+                    {
+                        rule_list_new[k] = rule_list[k - rule.pattern_size[j] + 1];
+                    }
+                    if(msg_match2(message, rule_list_new, rule_list_len + rule.pattern_size[j] - 1, rules, rule_id_lookup))
+                    {
+                        return 1;
+                    }
+                }
+            }
+            return 0;
+        }
+    }
+
+    if(rule_list_len != strlen(message))
+    {
+        return 0;
+    }
+
+    // every character is matched correctly, no more, no less
+    return 1;
+}
+
 int part2(char *input_filename)
 {
     int num_rules;
@@ -173,11 +230,13 @@ int part2(char *input_filename)
     get_input(input_filename, &num_rules, rules, &num_messages, messages);
     build_rule_id_lookup(num_rules, rules, rule_id_lookup);
 
+    assert(rule_id_lookup[8] != -1);
     rules[rule_id_lookup[8]].num_patterns = 2;
     rules[rule_id_lookup[8]].pattern_size[1] = 2;
     rules[rule_id_lookup[8]].pattern[1][0] = 42;
     rules[rule_id_lookup[8]].pattern[1][1] = 8;
 
+    assert(rule_id_lookup[11] != -1);
     rules[rule_id_lookup[11]].num_patterns = 2;
     rules[rule_id_lookup[11]].pattern_size[1] = 3;
     rules[rule_id_lookup[11]].pattern[1][0] = 42;
@@ -185,10 +244,11 @@ int part2(char *input_filename)
     rules[rule_id_lookup[11]].pattern[1][2] = 31;
 
     int count = 0;
+    int rule_list[MAX_STR_LEN] = {0};
 
     for(int i = 0; i < num_messages; ++i)
     {
-        count += (msg_match(messages[i], 0, rule_id_lookup[0], rules, rule_id_lookup) == strlen(messages[i]));
+        count += msg_match2(messages[i], rule_list, 1, rules, rule_id_lookup);
     }
 
     return count;
