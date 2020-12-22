@@ -1,5 +1,14 @@
 
+#include <assert.h>
 #include <stdio.h>
+
+void get_input(char *input_filename)
+{
+    FILE *fp = fopen(input_filename, "r");
+    assert(fp != NULL);
+
+    fclose(fp);
+}
 
 int part1(char *input_filename)
 {
