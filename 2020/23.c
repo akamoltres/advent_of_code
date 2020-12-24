@@ -8,6 +8,8 @@
 
 #define NUM_CUPS_1 9
 
+// the part 2 solution would work more efficiently for part 1 as well,
+// just leaving this in here to show the brute implementation (for fun)
 void play_game(char *order, int num_turns)
 {
     int current_cup_idx = 0;
@@ -115,8 +117,9 @@ typedef struct Cup
 
 void play_game_2(Cup_t *circle, int current_cup, int num_moves)
 {
-    for(int move = 0; move < num_moves; ++move)
+    for(int move = 1; move <= num_moves; ++move)
     {
+        // figure out the cups that are picked up
         int picked_up[3];
         int next_cup = circle[current_cup].next_cup;
         for(int i = 0; i < PICKED_UP; ++i)
@@ -125,24 +128,38 @@ void play_game_2(Cup_t *circle, int current_cup, int num_moves)
             next_cup = circle[next_cup].next_cup;
         }
 
-        int destination_cup = current_cup - 1;
+        // identify the destination cup
+        int destination_cup = (current_cup == 1 ? NUM_CUPS_2 : current_cup - 1);
         for(int i = 0; i < PICKED_UP * PICKED_UP; ++i)
         {
             if(destination_cup == picked_up[i % PICKED_UP])
             {
-                destination_cup = (destination_cup - 1 + NUM_CUPS_2) % NUM_CUPS_2;
+                destination_cup = (destination_cup == 1 ? NUM_CUPS_2 : destination_cup - 1);
             }
         }
 
         // remove the three picked up cups
+        int new_next_cup = current_cup;
+        for(int i = 0; i < PICKED_UP + 1; ++i)
+        {
+            new_next_cup = circle[new_next_cup].next_cup;
+        }
+        circle[current_cup].next_cup = new_next_cup;
+        circle[new_next_cup].prev_cup = current_cup;
 
-        // place the three picked up cups
+        // insert the three picked up cups
+        new_next_cup = circle[destination_cup].next_cup;
+        circle[destination_cup].next_cup = picked_up[0];
+        circle[picked_up[0]].prev_cup = destination_cup;
+        circle[picked_up[PICKED_UP - 1]].next_cup = new_next_cup;
+        circle[new_next_cup].prev_cup = picked_up[PICKED_UP - 1];
 
-        return;
+        // update the current cup
+        current_cup = circle[current_cup].next_cup;
     }
 }
 
-int part2(char *start_order)
+unsigned long part2(char *start_order)
 {
     Cup_t *circle;
     circle = (Cup_t *) malloc((NUM_CUPS_2 + 1) * sizeof(Cup_t));
@@ -162,10 +179,14 @@ int part2(char *start_order)
 
     play_game_2(circle, start_order[0] - '0', 10000000);
 
+    // find the solution
+    unsigned long first = circle[1].next_cup;
+    unsigned long second = circle[first].next_cup;
 
     free(circle);
+    circle = NULL;
 
-    return -1;
+    return (first * second);
 }
 
 int main(int argc, char *argv[])
@@ -177,7 +198,7 @@ int main(int argc, char *argv[])
     }
 
     printf("Part 1: %d\n", part1(argv[1]));
-    printf("Part 2: %d\n", part2(argv[1]));
+    printf("Part 2: %lu\n", part2(argv[1]));
 
     return 0;
 }
