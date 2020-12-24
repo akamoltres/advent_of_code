@@ -6,21 +6,11 @@
 #define NUM_CUPS 9
 #define PICKED_UP 3
 
-/*
-int get_destination_idx(int current_idx, char order[NUM_CUPS + 1])
+void play_game(char *order, int num_turns)
 {
-    char desired_label = (order[current_idx] == '0' ? '9' : order[current_idx] - 1);
-}
-*/
-
-int part1(char *start_order)
-{
-    char order[NUM_CUPS + 1] = {0};
-    memcpy(order, start_order, NUM_CUPS * sizeof(char));
-
     int current_cup_idx = 0;
 
-    for(int turn = 1; turn <= 100; ++turn)
+    for(int turn = 1; turn <= num_turns; ++turn)
     {
         char current_cup = order[current_cup_idx];
 
@@ -86,6 +76,15 @@ int part1(char *start_order)
             }
         }
     }
+}
+
+int part1(char *start_order)
+{
+    char order[NUM_CUPS + 1] = {0};
+    memcpy(order, start_order, NUM_CUPS * sizeof(char));
+
+    // play the game
+    play_game(order, 100);
 
     // get the answer
     int retval = 0;
