@@ -24,7 +24,7 @@ int get_input(char *input_filename, char flips[MAX_FLIPS][MAX_STEPS])
     return num_flips - 1;
 }
 
-int d_col(int row, int col, char dir)
+int d_col(int row, char dir)
 {
     if(row % 2 == 0)
     {
@@ -38,15 +38,23 @@ int d_col(int row, int col, char dir)
     assert(0);
 }
 
-int part1(char *input_filename)
+int count_black_tiles(char tiles[GRID_DIM][GRID_DIM])
 {
-    char flips[MAX_FLIPS][MAX_STEPS];
-    memset(flips, 0, MAX_FLIPS * MAX_STEPS * sizeof(char));
-    char tiles[GRID_DIM][GRID_DIM];
-    memset(tiles, 0, GRID_DIM * GRID_DIM * sizeof(char));
+    int count = 0;
 
-    int num_flips = get_input(input_filename, flips);
+    for(int i = 0; i < GRID_DIM; ++i)
+    {
+        for(int j = 0; j < GRID_DIM; ++j)
+        {
+            count += tiles[i][j];
+        }
+    }
 
+    return count;
+}
+
+void flip_tiles(int num_flips, char flips[MAX_FLIPS][MAX_STEPS], char tiles[GRID_DIM][GRID_DIM])
+{
     const int rtr = GRID_DIM / 2;
     const int rtc = GRID_DIM / 2;
 
@@ -66,12 +74,12 @@ int part1(char *input_filename)
                     c -= 1;
                     break;
                 case 's':
-                    c += d_col(r, c, flips[flip][step + 1]);
+                    c += d_col(r, flips[flip][step + 1]);
                     r += 1;
                     step += 1;
                     break;
                 case 'n':
-                    c += d_col(r, c, flips[flip][step + 1]);
+                    c += d_col(r, flips[flip][step + 1]);
                     r -= 1;
                     step += 1;
                     break;
@@ -85,22 +93,75 @@ int part1(char *input_filename)
 
         tiles[r][c] = 1 - tiles[r][c];
     }
+}
 
-    int black_count = 0;
-    for(int i = 0; i < GRID_DIM; ++i)
+int part1(char *input_filename)
+{
+    char flips[MAX_FLIPS][MAX_STEPS];
+    memset(flips, 0, MAX_FLIPS * MAX_STEPS * sizeof(char));
+    char tiles[GRID_DIM][GRID_DIM];
+    memset(tiles, 0, GRID_DIM * GRID_DIM * sizeof(char));
+
+    int num_flips = get_input(input_filename, flips);
+
+    flip_tiles(num_flips, flips, tiles);
+
+    return count_black_tiles(tiles);
+}
+
+void game_of_life(char tiles[GRID_DIM][GRID_DIM])
+{
+    char new_tiles[GRID_DIM][GRID_DIM];
+    memset(new_tiles, 0, GRID_DIM * GRID_DIM * sizeof(char));
+
+    for(int r = 1; r + 1 < GRID_DIM; ++r)
     {
-        for(int j = 0; j < GRID_DIM; ++j)
+        for(int c = 1; c + 1 < GRID_DIM; ++c)
         {
-            black_count += tiles[i][j];
+            int count = 0;
+            count += tiles[r][c - 1];
+            count += tiles[r][c + 1];
+            count += tiles[r - 1][c + d_col(r, 'e')];
+            count += tiles[r - 1][c + d_col(r, 'w')];
+            count += tiles[r + 1][c + d_col(r, 'e')];
+            count += tiles[r + 1][c + d_col(r, 'w')];
+
+            if(tiles[r][c] == 0 && count == 2)
+            {
+                new_tiles[r][c] = 1;
+                assert(r != 1 && c != 1 && r != GRID_DIM - 2 && c != GRID_DIM - 2);
+            }
+            else if(tiles[r][c] == 1 && (count == 0 || count > 2))
+            {
+                new_tiles[r][c] = 0;
+            }
         }
     }
 
-    return black_count;
+    memcpy(tiles, new_tiles, GRID_DIM * GRID_DIM * sizeof(char));
 }
 
 int part2(char *input_filename)
 {
-    return -1;
+    char flips[MAX_FLIPS][MAX_STEPS];
+    memset(flips, 0, MAX_FLIPS * MAX_STEPS * sizeof(char));
+    char tiles[GRID_DIM][GRID_DIM];
+    memset(tiles, 0, GRID_DIM * GRID_DIM * sizeof(char));
+
+    int num_flips = get_input(input_filename, flips);
+
+    flip_tiles(num_flips, flips, tiles);
+
+    printf("%d\n", count_black_tiles(tiles));
+
+    for(int i = 0; i < 10; ++i)
+    {
+        game_of_life(tiles);
+        printf("%d\n", count_black_tiles(tiles));
+        return -1;
+    }
+
+    return count_black_tiles(tiles);
 }
 
 int main(int argc, char *argv[])
