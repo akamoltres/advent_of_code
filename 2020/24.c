@@ -135,6 +135,10 @@ void game_of_life(char tiles[GRID_DIM][GRID_DIM])
             {
                 new_tiles[r][c] = 0;
             }
+            else
+            {
+                new_tiles[r][c] = tiles[r][c];
+            }
         }
     }
 
@@ -152,13 +156,9 @@ int part2(char *input_filename)
 
     flip_tiles(num_flips, flips, tiles);
 
-    printf("%d\n", count_black_tiles(tiles));
-
-    for(int i = 0; i < 10; ++i)
+    for(int i = 0; i < 100; ++i)
     {
         game_of_life(tiles);
-        printf("%d\n", count_black_tiles(tiles));
-        return -1;
     }
 
     return count_black_tiles(tiles);
