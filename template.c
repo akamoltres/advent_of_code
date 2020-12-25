@@ -22,11 +22,7 @@ int part2(char *input_filename)
 
 int main(int argc, char *argv[])
 {
-    if(argc != 2)
-    {
-        printf("Exactly 1 argument (input file) required\n");
-        return -1;
-    }
+    assert(argc == 2);
 
     printf("Part 1: %d\n", part1(argv[1]));
     printf("Part 2: %d\n", part2(argv[1]));
