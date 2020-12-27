@@ -215,15 +215,21 @@ int compare_sides(Tile_t *tile1, int side1, Tile_t *tile2, int side2)
     return strcmp(t1s, t2s);
 }
 
+int side_has_match(int tile_idx, int side, int num_tiles, Tile_t tiles[MAX_NUM_TILES])
+{
+}
+
 void assemble_grid(int num_tiles, int side_length,
                    Tile_t tiles[MAX_NUM_TILES],
                    Tile_t grid[MAX_SIDE_LEN][MAX_SIDE_LEN])
 {
     // int tile_used[MAX_NUM_TILES] = {0};
 
-    // step 1: find a corner tile
+    // step 0: generate strings for all the edges
     TileSides_t sides[MAX_NUM_TILES];
     generate_sides(num_tiles, tiles, sides);
+
+    // step 1: find a corner tile
     int first_corner = -1;
     for(int i = 0; i < num_tiles; ++i)
     {
