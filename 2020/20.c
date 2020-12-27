@@ -1,10 +1,12 @@
 
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
 #define TILE_DIM 10
-#define MAX_NUM_TILES 200
+#define MAX_SIDE_LEN 15
+#define MAX_NUM_TILES MAX_SIDE_LEN * MAX_SIDE_LEN
 
 typedef unsigned long ul;
 
@@ -88,6 +90,33 @@ void generate_sides(int num_tiles, Tile_t tiles[MAX_NUM_TILES], TileSides_t side
     }
 }
 
+// returns 1 if the tile is a corner, 0 otherwise
+int is_corner(int idx, int num_tiles, Tile_t tiles[MAX_NUM_TILES], TileSides_t sides[MAX_NUM_TILES])
+{
+    int matched_edges = 0;
+
+    for(int i = 0; i < 8; i += 2)
+    {
+        int matched = 0;
+
+        for(int j = 0; !matched && j < num_tiles; ++j)
+        {
+            if(tiles[idx].id != tiles[j].id)
+            {
+                for(int l = 0; !matched && l < 8; ++l)
+                {
+                    matched = (!strcmp(sides[idx].s[i],     sides[j].s[l]) ||
+                               !strcmp(sides[idx].s[i + 1], sides[j].s[l]));
+                }
+            }
+        }
+
+        matched_edges += matched;
+    }
+
+    return (matched_edges == 2);
+}
+
 ul part1(char *input_filename)
 {
     Tile_t tiles[MAX_NUM_TILES];
@@ -100,25 +129,7 @@ ul part1(char *input_filename)
 
     for(int i = 0; i < num_tiles; ++i)
     {
-        int unmatched_edges = 0;
-
-        for(int j = 0; j < 8; j += 2)
-        {
-            int matched = 0;
-            for(int k = 0; !matched && k < num_tiles; ++k)
-            {
-                if(i != k)
-                {
-                    for(int l = 0; !matched && l < 8; ++l)
-                    {
-                        matched = (!strcmp(sides[i].s[j], sides[k].s[l]) || !strcmp(sides[i].s[j + 1], sides[k].s[l]));
-                    }
-                }
-            }
-            unmatched_edges += matched;
-        }
-
-        if(unmatched_edges == 2)
+        if(is_corner(i, num_tiles, tiles, sides))
         {
             retval *= tiles[i].id;
         }
@@ -127,8 +138,120 @@ ul part1(char *input_filename)
     return retval;
 }
 
+void rot90(Tile_t *tile)
+{
+    Tile_t rot;
+    memset(rot.p, 0, TILE_DIM * (TILE_DIM + 1) * sizeof(char));
+
+    for(int i = 0; i < TILE_DIM; ++i)
+    {
+        for(int j = 0; j < TILE_DIM; ++j)
+        {
+            rot.p[i][j] = tile->p[TILE_DIM - j - 1][i];
+        }
+    }
+
+    memcpy(tile->p, rot.p, TILE_DIM * (TILE_DIM + 1) * sizeof(char));
+}
+
+// side 1 is top
+// side 2 is right
+// side 3 is bottom
+// side 4 is left
+void get_side(Tile_t *tile, int side, char s[TILE_DIM + 1])
+{
+    switch(side)
+    {
+        case 1:
+            strcpy(s, tile->p[0]);
+            break;
+        case 2:
+            for(int i = 0; i < TILE_DIM; ++i)
+            {
+                s[i] = tile->p[i][TILE_DIM - 1];
+            }
+            s[TILE_DIM] = '\0';
+        case 3:
+            strcpy(s, tile->p[TILE_DIM - 1]);
+            break;
+        case 4:
+            for(int i = 0; i < TILE_DIM; ++i)
+            {
+                s[i] = tile->p[i][0];
+            }
+            s[TILE_DIM] = '\0';
+            break;
+        default:
+            assert(0);
+    }
+}
+
+/*
+static void print_tile(Tile_t t)
+{
+    printf("%lu\n", t.id);
+    for(int i = 0; i < TILE_DIM; ++i)
+    {
+        printf("%s\n", t.p[i]);
+    }
+}
+*/
+
+// side 1 is top
+// side 2 is right
+// side 3 is bottom
+// side 4 is left
+// returns 0 if they match, something else if they don't
+int compare_sides(Tile_t *tile1, int side1, Tile_t *tile2, int side2)
+{
+    char t1s[TILE_DIM + 1];
+    char t2s[TILE_DIM + 1];
+
+    get_side(tile1, side1, t1s);
+    get_side(tile2, side2, t2s);
+
+    printf("%s %s\n", t1s, t2s);
+
+    return strcmp(t1s, t2s);
+}
+
+void assemble_grid(int num_tiles, int side_length,
+                   Tile_t tiles[MAX_NUM_TILES],
+                   Tile_t grid[MAX_SIDE_LEN][MAX_SIDE_LEN])
+{
+    // int tile_used[MAX_NUM_TILES] = {0};
+
+    // step 1: find a corner tile
+    TileSides_t sides[MAX_NUM_TILES];
+    generate_sides(num_tiles, tiles, sides);
+    int first_corner = -1;
+    for(int i = 0; i < num_tiles; ++i)
+    {
+        if(is_corner(i, num_tiles, tiles, sides))
+        {
+            first_corner = i;
+            break;
+        }
+    }
+    assert(first_corner != -1);
+    printf("%lu\n", tiles[first_corner].id);
+
+    // step 2: place the corner tile
+
+    // step 3: walk through the grid, placing tiles as they are found to fit
+}
+
 int part2(char *input_filename)
 {
+    Tile_t tiles[MAX_NUM_TILES];
+
+    int num_tiles = get_inputs(input_filename, tiles);
+
+    Tile_t grid[MAX_SIDE_LEN][MAX_SIDE_LEN];
+    int side_length = (int) (sqrt((double) num_tiles) + 0.5);
+
+    assemble_grid(num_tiles, side_length, tiles, grid);
+
     return -1;
 }
 
