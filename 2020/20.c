@@ -7,6 +7,9 @@
 #define TILE_DIM 10
 #define MAX_SIDE_LEN 15
 #define MAX_NUM_TILES MAX_SIDE_LEN * MAX_SIDE_LEN
+#define MAX_SIDE_PX MAX_SIDE_LEN * (TILE_DIM - 2)
+#define WIDTH_MONSTER_PX 20
+#define HEIGHT_MONSTER_PX 3
 
 typedef unsigned long ul;
 
@@ -20,17 +23,6 @@ typedef struct TileSides
 {
     char s[8][TILE_DIM + 1];
 } TileSides_t;
-
-/*
-static void print_tile(Tile_t t)
-{
-    printf("%lu\n", t.id);
-    for(int i = 0; i < TILE_DIM; ++i)
-    {
-        printf("%s\n", t.p[i]);
-    }
-}
-*/
 
 int get_inputs(char *input_filename, Tile_t tiles[MAX_NUM_TILES])
 {
@@ -71,33 +63,58 @@ void strcpy_flip(char *dest, char *src)
     dest[len] = '\0';
 }
 
+// side 1 is top
+// side 2 is right
+// side 3 is bottom
+// side 4 is left
+void get_side(Tile_t *tile, int side, char s[TILE_DIM + 1])
+{
+    switch(side)
+    {
+        case 1:
+            strcpy(s, tile->p[0]);
+            break;
+        case 2:
+            for(int i = 0; i < TILE_DIM; ++i)
+            {
+                s[i] = tile->p[i][TILE_DIM - 1];
+            }
+            s[TILE_DIM] = '\0';
+            break;
+        case 3:
+            strcpy(s, tile->p[TILE_DIM - 1]);
+            break;
+        case 4:
+            for(int i = 0; i < TILE_DIM; ++i)
+            {
+                s[i] = tile->p[i][0];
+            }
+            s[TILE_DIM] = '\0';
+            break;
+        default:
+            assert(0);
+    }
+}
+
 void generate_sides(int num_tiles, Tile_t tiles[MAX_NUM_TILES], TileSides_t sides[MAX_NUM_TILES])
 {
     for(int i = 0; i < num_tiles; ++i)
     {
         // top
-        strcpy(sides[i].s[0], tiles[i].p[0]);
+        get_side(&tiles[i], 1, sides[i].s[0]);
         strcpy_flip(sides[i].s[1], sides[i].s[0]);
 
+        // right
+        get_side(&tiles[i], 2, sides[i].s[6]);
+        strcpy_flip(sides[i].s[7], sides[i].s[6]);
+
         // bottom
-        strcpy(sides[i].s[2], tiles[i].p[TILE_DIM - 1]);
+        get_side(&tiles[i], 3, sides[i].s[2]);
         strcpy_flip(sides[i].s[3], sides[i].s[2]);
 
         // left
-        for(int j = 0; j < TILE_DIM; ++j)
-        {
-            sides[i].s[4][j] = tiles[i].p[j][0];
-        }
-        sides[i].s[4][TILE_DIM] = '\0';
+        get_side(&tiles[i], 4, sides[i].s[4]);
         strcpy_flip(sides[i].s[5], sides[i].s[4]);
-
-        // right
-        for(int j = 0; j < TILE_DIM; ++j)
-        {
-            sides[i].s[6][j] = tiles[i].p[j][TILE_DIM - 1];
-        }
-        sides[i].s[6][TILE_DIM] = '\0';
-        strcpy_flip(sides[i].s[7], sides[i].s[6]);
     }
 }
 
@@ -182,39 +199,6 @@ void flip(Tile_t *tile)
 // side 2 is right
 // side 3 is bottom
 // side 4 is left
-void get_side(Tile_t *tile, int side, char s[TILE_DIM + 1])
-{
-    switch(side)
-    {
-        case 1:
-            strcpy(s, tile->p[0]);
-            break;
-        case 2:
-            for(int i = 0; i < TILE_DIM; ++i)
-            {
-                s[i] = tile->p[i][TILE_DIM - 1];
-            }
-            s[TILE_DIM] = '\0';
-            break;
-        case 3:
-            strcpy(s, tile->p[TILE_DIM - 1]);
-            break;
-        case 4:
-            for(int i = 0; i < TILE_DIM; ++i)
-            {
-                s[i] = tile->p[i][0];
-            }
-            s[TILE_DIM] = '\0';
-            break;
-        default:
-            assert(0);
-    }
-}
-
-// side 1 is top
-// side 2 is right
-// side 3 is bottom
-// side 4 is left
 // returns 0 if they match, something else if they don't
 int compare_sides(Tile_t *tile1, int side1, Tile_t *tile2, int side2)
 {
@@ -227,6 +211,7 @@ int compare_sides(Tile_t *tile1, int side1, Tile_t *tile2, int side2)
     return strcmp(t1s, t2s);
 }
 
+// check if this side matches with the side of any other tile
 int side_has_match(int tile_idx, int side, int num_tiles, Tile_t tiles[MAX_NUM_TILES])
 {
     char candidate_side[TILE_DIM + 1];
@@ -371,6 +356,92 @@ void assemble_grid(int num_tiles, int side_length,
             assert(tile_placed);
         }
     }
+
+    // step 4: verify all the tiles are used
+    for(int i = 0; i < num_tiles; ++i)
+    {
+        assert(tile_used[i]);
+    }
+}
+
+void rot90_img(int sidelen, char img[MAX_SIDE_PX][MAX_SIDE_PX + 1])
+{
+    char buffer[MAX_SIDE_PX][MAX_SIDE_PX + 1];
+    memset(buffer, 0, MAX_SIDE_PX * (MAX_SIDE_PX + 1) * sizeof(char));
+
+    for(int i = 0; i < sidelen; ++i)
+    {
+        for(int j = 0; j < sidelen; ++j)
+        {
+            buffer[i][j] = img[sidelen - j - 1][i];
+        }
+    }
+
+    memcpy(img, buffer, MAX_SIDE_PX * (MAX_SIDE_PX + 1) * sizeof(char));
+}
+
+void flip_img(int sidelen, char img[MAX_SIDE_PX][MAX_SIDE_PX + 1])
+{
+    char buffer[MAX_SIDE_PX][MAX_SIDE_PX + 1];
+    memset(buffer, 0, MAX_SIDE_PX * (MAX_SIDE_PX + 1) * sizeof(char));
+
+    for(int i = 0; i < sidelen; ++i)
+    {
+        for(int j = 0; j < sidelen; ++j)
+        {
+            strcpy_flip(buffer[i], img[i]);
+        }
+    }
+
+    memcpy(img, buffer, MAX_SIDE_PX * (MAX_SIDE_PX + 1) * sizeof(char));
+}
+
+// counts sea monsters, replacing them with 'O'
+int count_sea_monsters(int side_length, char image[MAX_SIDE_PX][MAX_SIDE_PX + 1])
+{
+    int count = 0;
+
+    for(int i = 0; i + HEIGHT_MONSTER_PX < side_length; ++i)
+    {
+        for(int j = 0; j + WIDTH_MONSTER_PX < side_length; ++j)
+        {
+            if(image[i][j + 18] == '#' &&
+               image[i + 1][j] == '#' &&
+               image[i + 1][j + 5] == '#' &&
+               image[i + 1][j + 6] == '#' &&
+               image[i + 1][j + 11] == '#' &&
+               image[i + 1][j + 12] == '#' &&
+               image[i + 1][j + 17] == '#' &&
+               image[i + 1][j + 18] == '#' &&
+               image[i + 1][j + 19] == '#' &&
+               image[i + 2][j + 1] == '#' &&
+               image[i + 2][j + 4] == '#' &&
+               image[i + 2][j + 7] == '#' &&
+               image[i + 2][j + 10] == '#' &&
+               image[i + 2][j + 13] == '#' &&
+               image[i + 2][j + 16] == '#')
+            {
+                count += 1;
+                image[i][j + 18] = 'O';
+                image[i + 1][j] = 'O';
+                image[i + 1][j + 5] = 'O';
+                image[i + 1][j + 6] = 'O';
+                image[i + 1][j + 11] = 'O';
+                image[i + 1][j + 12] = 'O';
+                image[i + 1][j + 17] = 'O';
+                image[i + 1][j + 18] = 'O';
+                image[i + 1][j + 19] = 'O';
+                image[i + 2][j + 1] = 'O';
+                image[i + 2][j + 4] = 'O';
+                image[i + 2][j + 7] = 'O';
+                image[i + 2][j + 10] = 'O';
+                image[i + 2][j + 13] = 'O';
+                image[i + 2][j + 16] = 'O';
+            }
+        }
+    }
+
+    return count;
 }
 
 int part2(char *input_filename)
@@ -384,7 +455,58 @@ int part2(char *input_filename)
 
     assemble_grid(num_tiles, side_length, tiles, grid);
 
-    return -1;
+    // build the image
+    char image[MAX_SIDE_PX][MAX_SIDE_PX + 1];
+    memset(image, 0, MAX_SIDE_PX * (MAX_SIDE_PX + 1) * sizeof(char));
+    for(int r = 0; r < side_length; ++r)
+    {
+        for(int c = 0; c < side_length; ++c)
+        {
+            for(int k = 1; k + 1 < TILE_DIM; ++k)
+            {
+                for(int l = 1; l + 1 < TILE_DIM; ++l)
+                {
+                    image[r * (TILE_DIM - 2) + k - 1][c * (TILE_DIM - 2) + l - 1] = grid[r][c].p[k][l];
+                }
+            }
+        }
+    }
+
+    // orient and find sea monsters
+    int num_sea_monsters = 0;
+    for(int i = 0; num_sea_monsters == 0 && i < 2; ++i)
+    {
+        for(int j = 0; j < 4; ++j)
+        {
+            num_sea_monsters = count_sea_monsters(side_length * (TILE_DIM - 2), image);
+
+            if(num_sea_monsters == 0)
+            {
+                rot90_img(side_length * (TILE_DIM - 2), image);
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        if(num_sea_monsters == 0)
+        {
+            flip_img(side_length * (TILE_DIM - 2), image);
+        }
+    }
+
+    // count the roughness
+    int roughness = 0;
+    for(int i = 0; i < side_length * (TILE_DIM - 2); ++i)
+    {
+        for(int j = 0; j < side_length * (TILE_DIM - 2); ++j)
+        {
+            roughness += (image[i][j] == '#');
+        }
+    }
+
+    return roughness;
 }
 
 int main(int argc, char *argv[])
