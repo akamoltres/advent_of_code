@@ -1,10 +1,6 @@
 
-#include <assert.h>
-#include <string.h>
-
 #include "CppUTest/TestHarness.h"
 #include "TestIntcode.hpp"
-#include "intcode.h"
 #include "sol.h"
 
 TEST_GROUP(DAY_5)
@@ -19,37 +15,6 @@ TEST(DAY_5, TEST_SOL)
 
 TEST_GROUP_BASE(INTCODE_DAY5, IntcodeTest_c)
 {
-    // Tests an intcode program with the provided inputs
-    // and validates against the provided outputs
-    void test_program(const int bufsize,
-                      int *buffer,
-                      int input_count,
-                      int *input_buffer,
-                      int expected_output_count,
-                      int *output_buffer)
-    {
-        IntcodeReturn_t retval;
-        memset(&retval, 0, sizeof(IntcodeReturn_t));
-        int num_inputs_used = 0;
-        int output_count = 0;
-        do {
-            retval = run_intcode(bufsize,
-                                 bufsize,
-                                 buffer,
-                                 input_count,
-                                 input_buffer + num_inputs_used,
-                                 retval.pc);
-            if(!retval.halt)
-            {
-                num_inputs_used += retval.input_used;
-                assert(num_inputs_used <= input_count);
-                CHECK_EQUAL(output_buffer[output_count], retval.retval);
-                assert(++output_count <= expected_output_count);
-            }
-        } while(!retval.halt);
-        CHECK_EQUAL(expected_output_count, output_count);
-    }
-
     // Tests an intcode program that has a single input
     // and a single output
     void test_with_input(const int bufsize,
@@ -61,12 +26,12 @@ TEST_GROUP_BASE(INTCODE_DAY5, IntcodeTest_c)
         int input_buffer[input_count] = {expected_input};
         const int output_count = 1;
         int output_buffer[output_count] = {expected_output};
-        test_program(bufsize,
-                     buffer,
-                     input_count,
-                     input_buffer,
-                     output_count,
-                     output_buffer);
+        (void) test_program(bufsize,
+                            buffer,
+                            input_count,
+                            input_buffer,
+                            output_count,
+                            output_buffer);
     }
 };
 
@@ -82,12 +47,12 @@ TEST(INTCODE_DAY5, TEST0)
     const int output_count = input_count;
     int *output_buffer = input_buffer;
 
-    test_program(bufsize,
-                 buffer,
-                 input_count,
-                 input_buffer,
-                 output_count,
-                 output_buffer);
+    (void) test_program(bufsize,
+                        buffer,
+                        input_count,
+                        input_buffer,
+                        output_count,
+                        output_buffer);
     CHECK(!buffers_different(bufsize, expected_end, buffer));
 };
 
@@ -99,12 +64,12 @@ TEST(INTCODE_DAY5, TEST1)
     int buffer[bufsize] = {1002,4,3,4,33};
     int expected_end[bufsize] = {1002,4,3,4,99};
 
-    test_program(bufsize,
-                 buffer,
-                 0,
-                 NULL,
-                 0,
-                 NULL);
+    (void) test_program(bufsize,
+                        buffer,
+                        0,
+                        NULL,
+                        0,
+                        NULL);
     CHECK(!buffers_different(bufsize, expected_end, buffer));
 }
 
@@ -115,12 +80,12 @@ TEST(INTCODE_DAY5, TEST2)
     int buffer[bufsize] = {1101,100,-1,4,0};
     int expected_end[bufsize] = {1101,100,-1,4,99};
 
-    test_program(bufsize,
-                 buffer,
-                 0,
-                 NULL,
-                 0,
-                 NULL);
+    (void) test_program(bufsize,
+                        buffer,
+                        0,
+                        NULL,
+                        0,
+                        NULL);
     CHECK(!buffers_different(bufsize, expected_end, buffer));
 }
 
