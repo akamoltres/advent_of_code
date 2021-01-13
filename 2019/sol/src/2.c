@@ -5,7 +5,7 @@
 #include <string.h>
 
 // Returns -1 if failed
-int part1(char *input_filename)
+int solve_2019_2_1(char *input_filename)
 {
     const int bufsize = 200;
     int buffer[bufsize];
@@ -19,13 +19,13 @@ int part1(char *input_filename)
     buffer[1] = 12;
     buffer[2] = 2;
 
-    (void) run_intcode(program_length, bufsize, buffer, 0, NULL);
+    (void) run_intcode(program_length, bufsize, buffer, 0, NULL, 0);
 
     return buffer[0];
 }
 
 // Returns -1 if failed
-int part2(char *input_filename)
+int solve_2019_2_2(char *input_filename)
 {
     const int bufsize = 200;
     int buffer[bufsize];
@@ -46,7 +46,7 @@ int part2(char *input_filename)
             memcpy(test_program, buffer, sizeof(int) * bufsize);
             test_program[1] = noun;
             test_program[2] = verb;
-            (void) run_intcode(program_length, bufsize, test_program, 0, NULL);
+            (void) run_intcode(program_length, bufsize, test_program, 0, NULL, 0);
             if(test_program[0] == desired_output)
             {
                 return noun * 100 + verb;
@@ -57,7 +57,7 @@ int part2(char *input_filename)
     return -1;
 }
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
     if(argc != 2)
     {
@@ -69,4 +69,4 @@ int main(int argc, char *argv[])
     printf("Part 2: %d\n", part2(argv[1]));
 
     return 0;
-}
+}*/

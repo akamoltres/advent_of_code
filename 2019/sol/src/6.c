@@ -104,7 +104,7 @@ int count_indirect_orbits(const int bufsize, Relation_t *buffer, int index)
 }
 
 // Returns -1 if unexpected failure
-int part1(char *input_filename)
+int solve_2019_6_1(char *input_filename)
 {
     const int bufsize = 5000;
     Relation_t buffer[bufsize];
@@ -180,7 +180,7 @@ int build_chain(const int bufsize, Relation_t *buffer, int *chain_buffer)
 }
 
 // Returns -1 if unexpected failure
-int part2(char *input_filename)
+int solve_2019_6_2(char *input_filename)
 {
     const int bufsize = 5000;
     Relation_t buffer[bufsize];
@@ -235,7 +235,7 @@ int part2(char *input_filename)
     return -1;
 }
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
     if(argc != 2)
     {
@@ -247,4 +247,4 @@ int main(int argc, char *argv[])
     printf("Part 2: %d\n", part2(argv[1]));
 
     return 0;
-}
+}*/

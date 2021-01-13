@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 
-unsigned long part1(char *input_filename)
+unsigned long solve_2019_1_1(char const *input_filename)
 {
     unsigned long total_fuel = 0;
     unsigned long module_mass = 0;
@@ -17,7 +17,7 @@ unsigned long part1(char *input_filename)
     return total_fuel;
 }
 
-long part2(char *input_filename)
+long solve_2019_1_2(char const *input_filename)
 {
     unsigned long total_fuel = 0;
     unsigned long module_mass = 0;
@@ -38,7 +38,7 @@ long part2(char *input_filename)
     return total_fuel;
 }
 
-int main(int argc, char *argv[])
+/*int main(int argc, char *argv[])
 {
     if(argc != 2)
     {
@@ -50,4 +50,4 @@ int main(int argc, char *argv[])
     printf("Part 2: %ld\n", part2(argv[1]));
 
     return 0;
-}
+}*/

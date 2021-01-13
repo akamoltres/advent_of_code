@@ -1,5 +1,8 @@
 
+#include "intcode.h"
+
 #include <stdio.h>
+#include <string.h>
 
 void print_program(int program_length, int *buffer)
 {
@@ -14,7 +17,7 @@ void print_program(int program_length, int *buffer)
     }
 }
 
-int read_intcode(const int bufsize, int *buffer, char *filename)
+int read_intcode(const int bufsize, int *buffer, const char *filename)
 {
     int program_length = 0;
 
@@ -69,105 +72,110 @@ int read_intcode(const int bufsize, int *buffer, char *filename)
     }
 }
 
-int run_intcode(const int program_length, const int bufsize, int *buffer, const int input_length, int *input_buffer)
+IntcodeReturn_t run_intcode(const int program_length, const int bufsize, int *buffer, const int input_length, int *input_buffer, int pc)
 {
-    int position = 0;
-    int current_input = 0;
+    IntcodeReturn_t state;
+    memset(&state, 0, sizeof(IntcodeReturn_t));
+    state.pc = pc;
 
-    while(buffer[position] != 99)
+    while(buffer[state.pc] != 99)
     {
-        int mode1 = (buffer[position] % 1000) / 100;
-        int mode2 = (buffer[position] % 10000) / 1000;
-        switch(buffer[position] % 100)
+        int mode1 = (buffer[state.pc] % 1000) / 100;
+        int mode2 = (buffer[state.pc] % 10000) / 1000;
+        switch(buffer[state.pc] % 100)
         {
             case 1: // add
             {
-                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
-                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
-                buffer[buffer[position + 3]] = param1 + param2;
-                position += 4;
+                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
+                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
+                buffer[buffer[state.pc + 3]] = param1 + param2;
+                state.pc += 4;
                 break;
             }
             case 2: // multiply
             {
-                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
-                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
-                buffer[buffer[position + 3]] = param1 * param2;
-                position += 4;
+                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
+                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
+                buffer[buffer[state.pc + 3]] = param1 * param2;
+                state.pc += 4;
                 break;
             }
             case 3: // input
             {
-                if(current_input == input_length)
+                if(state.input_used == input_length)
                 {
-                    return -1;
+                    state.halt = -1;
+                    return state;
                 }
-                buffer[buffer[position + 1]] = input_buffer[current_input++];
-                position += 2;
+                buffer[buffer[state.pc + 1]] = input_buffer[state.input_used++];
+                state.pc += 2;
                 break;
             }
             case 4: // output
             {
-                int param = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
-                printf("Intcode program output: %d\n", param);
-                position += 2;
-                break;
+                state.retval = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
+                state.pc += 2;
+                return state;
             }
             case 5: // jump if true
             {
-                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
-                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
+                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
+                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
                 if(param1)
                 {
-                    position = param2;
+                    state.pc = param2;
                 }
                 else
                 {
-                    position += 3;
+                    state.pc += 3;
                 }
                 break;
             }
             case 6: // jump if false
             {
-                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
-                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
+                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
+                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
                 if(!param1)
                 {
-                    position = param2;
+                    state.pc = param2;
                 }
                 else
                 {
-                    position += 3;
+                    state.pc += 3;
                 }
                 break;
             }
             case 7: // less than
             {
-                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
-                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
-                buffer[buffer[position + 3]] = (param1 < param2);
-                position += 4;
+                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
+                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
+                buffer[buffer[state.pc + 3]] = (param1 < param2);
+                state.pc += 4;
                 break;
             }
             case 8: // equals
             {
-                int param1 = (mode1 ? buffer[position + 1] : buffer[buffer[position + 1]]);
-                int param2 = (mode2 ? buffer[position + 2] : buffer[buffer[position + 2]]);
-                buffer[buffer[position + 3]] = (param1 == param2);
-                position += 4;
+                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
+                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
+                buffer[buffer[state.pc + 3]] = (param1 == param2);
+                state.pc += 4;
                 break;
             }
             default:
             {
-                return -1;
+                state.halt = -1;
+                return state;
             }
         }
 
-        if(position >= bufsize)
+        if(state.pc >= bufsize)
         {
-            return -1;
+            state.halt = -1;
+            return state;
         }
     }
 
-    return 0;
+    state.halt = 1;
+
+    return state;
 }
