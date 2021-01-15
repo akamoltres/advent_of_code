@@ -25,6 +25,9 @@ int solve_2019_6_2(char const *input_filename);
 int solve_2019_7_1(char const *input_filename);
 int solve_2019_7_2(char const *input_filename);
 
+int solve_2019_8_1(char const *input_filename, int width, int height);
+char *solve_2019_8_2(char const *input_filename, int width, int height);
+
 #ifdef __cplusplus
 }
 #endif
