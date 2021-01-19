@@ -1,0 +1,19 @@
+name: 2019-ci
+
+on: [push]
+
+jobs:
+    ci-test:
+        name: Run automated CI tests
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+          - name: Install prerequisites
+            run:  sudo apt-get install cpputest
+          - name: Enter 2019 directory
+            run:  cd 2019
+          - name: Build tests
+            run:  make test
+          - name: Run tests
+            run:  ./build/tests.out
