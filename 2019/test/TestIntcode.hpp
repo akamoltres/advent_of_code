@@ -10,7 +10,7 @@ typedef class IntcodeTest: public Utest
 {
 public:
     // returns 0 if identical, 1 if different
-    int buffers_different(const int bufsize, int *expected, int *actual)
+    int buffers_different(const int bufsize, long *expected, long *actual)
     {
         for(int i = 0; i < bufsize; ++i)
         {
@@ -25,11 +25,11 @@ public:
     // Tests an intcode program with the provided inputs
     // and validates against the provided outputs
     IntcodeReturn_t test_program(const int bufsize,
-                      int *buffer,
+                      long *buffer,
                       int input_count,
-                      int *input_buffer,
+                      long *input_buffer,
                       int expected_output_count,
-                      int *output_buffer)
+                      long *output_buffer)
     {
         IntcodeReturn_t retval;
         memset(&retval, 0, sizeof(IntcodeReturn_t));
@@ -53,4 +53,4 @@ public:
         CHECK_EQUAL(expected_output_count, output_count);
         return retval;
     }
-} IntcodeTest_c;
+} IntcodeTest_t;

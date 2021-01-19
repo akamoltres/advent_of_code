@@ -5,10 +5,10 @@
 #include <string.h>
 
 // Returns -1 if failed
-int solve_2019_2_1(char *input_filename)
+long solve_2019_2_1(char *input_filename)
 {
     const int bufsize = 200;
-    int buffer[bufsize];
+    long buffer[bufsize];
 
     int program_length = read_intcode(bufsize, buffer, input_filename);
     if(program_length < 0)
@@ -25,10 +25,10 @@ int solve_2019_2_1(char *input_filename)
 }
 
 // Returns -1 if failed
-int solve_2019_2_2(char *input_filename)
+long solve_2019_2_2(char *input_filename)
 {
     const int bufsize = 200;
-    int buffer[bufsize];
+    long buffer[bufsize];
 
     int program_length = read_intcode(bufsize, buffer, input_filename);
     if(program_length < 0)
@@ -42,8 +42,8 @@ int solve_2019_2_2(char *input_filename)
     {
         for(int verb = 0; verb < 100; ++verb)
         {
-            int test_program[bufsize];
-            memcpy(test_program, buffer, sizeof(int) * bufsize);
+            long test_program[bufsize];
+            memcpy(test_program, buffer, sizeof(long) * bufsize);
             test_program[1] = noun;
             test_program[2] = verb;
             (void) run_intcode(program_length, bufsize, test_program, 0, NULL, 0);

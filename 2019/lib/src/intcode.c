@@ -1,5 +1,6 @@
 
 #include "intcode.h"
+#include "io.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -17,8 +18,11 @@ void print_program(int program_length, int *buffer)
     }
 }
 
-int read_intcode(const int bufsize, int *buffer, const char *filename)
+int read_intcode(const int bufsize, long *buffer, const char *filename)
 {
+    return read_csv_line(filename, buffer, bufsize);
+
+    /*
     int program_length = 0;
 
     FILE *fp;
@@ -70,9 +74,10 @@ int read_intcode(const int bufsize, int *buffer, const char *filename)
             return -2;
         }
     }
+    */
 }
 
-IntcodeReturn_t run_intcode(const int program_length, const int bufsize, int *buffer, const int input_length, int *input_buffer, int pc)
+IntcodeReturn_t run_intcode(const int program_length, const int bufsize, long *buffer, const int input_length, long *input_buffer, int pc)
 {
     IntcodeReturn_t state;
     memset(&state, 0, sizeof(IntcodeReturn_t));

@@ -4,13 +4,13 @@
 #include <stdio.h>
 
 // Returns 0 if successful
-int solve_2019_5(char *input_filename, int input)
+long solve_2019_5(char *input_filename, int input)
 {
     const int bufsize = 1000;
-    int buffer[bufsize];
+    long buffer[bufsize];
 
     const int input_bufsize = 1;
-    int input_buffer[input_bufsize];
+    long input_buffer[input_bufsize];
     input_buffer[0] = input;
 
     int program_length = read_intcode(bufsize, buffer, input_filename);
@@ -45,7 +45,7 @@ int solve_2019_5(char *input_filename, int input)
 /*int solve_2019_5_2(char *input_filename)
 {
     const int bufsize = 1000;
-    int buffer[bufsize];
+    long buffer[bufsize];
 
     const int input_bufsize = 1;
     int input_buffer[input_bufsize];
