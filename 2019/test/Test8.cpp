@@ -19,6 +19,7 @@ TEST(DAY_8, TEST_SOL)
 TEST(DAY_8, TEST_0)
 {
     CHECK_EQUAL(1, solve_2019_8_1("input/8_test0.txt", 3, 2));
+    CHECK_EQUAL(1, 0);
 }
 
 TEST(DAY_8, TEST_1)
