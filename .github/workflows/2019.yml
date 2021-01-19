@@ -10,10 +10,9 @@ jobs:
           - name: Checkout code
             uses: actions/checkout@v2
           - name: Install prerequisites
-            run:  sudo apt-get install cpputest
-          - name: Enter 2019 directory
-            run:  cd 2019
-          - name: Build tests
-            run:  make test
-          - name: Run tests
-            run:  ./build/tests.out
+            run: sudo apt-get install cpputest
+          - name: Build and run tests
+            working-directory: ./2019
+            run: |
+              make test
+              ./build/tests.out
