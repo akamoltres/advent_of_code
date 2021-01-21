@@ -1,40 +1,33 @@
 
 #include "intcode.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
 // Returns -1 if failed
 long solve_2019_2_1(char *input_filename)
 {
-    const int bufsize = 200;
-    long buffer[bufsize];
+    Intcode_t program;
 
-    int program_length = read_intcode(bufsize, buffer, input_filename);
-    if(program_length < 0)
-    {
-        return program_length;
-    }
+    int program_length = read_intcode(&program, input_filename);
+    assert(program_length > 0);
 
-    buffer[1] = 12;
-    buffer[2] = 2;
+    program.program[1] = 12;
+    program.program[2] = 2;
 
-    (void) run_intcode(program_length, bufsize, buffer, 0, NULL, 0);
+    (void) run_intcode(&program, 0, NULL);
 
-    return buffer[0];
+    return program.program[0];
 }
 
 // Returns -1 if failed
 long solve_2019_2_2(char *input_filename)
 {
-    const int bufsize = 200;
-    long buffer[bufsize];
+    Intcode_t program;
 
-    int program_length = read_intcode(bufsize, buffer, input_filename);
-    if(program_length < 0)
-    {
-        return program_length;
-    }
+    int program_length = read_intcode(&program, input_filename);
+    assert(program_length > 0);
 
     const int desired_output = 19690720;
 
@@ -42,31 +35,18 @@ long solve_2019_2_2(char *input_filename)
     {
         for(int verb = 0; verb < 100; ++verb)
         {
-            long test_program[bufsize];
-            memcpy(test_program, buffer, sizeof(long) * bufsize);
-            test_program[1] = noun;
-            test_program[2] = verb;
-            (void) run_intcode(program_length, bufsize, test_program, 0, NULL, 0);
-            if(test_program[0] == desired_output)
+            Intcode_t test_program;
+            memcpy(&test_program, &program, sizeof(Intcode_t));
+            test_program.program[1] = noun;
+            test_program.program[2] = verb;
+            (void) run_intcode(&test_program, 0, NULL);
+            if(test_program.program[0] == desired_output)
             {
-                return noun * 100 + verb;
+                return (noun * 100 + verb);
             }
         }
     }
 
-    return -1;
-}
-
-/*int main(int argc, char *argv[])
-{
-    if(argc != 2)
-    {
-        printf("Exactly 1 argument (input file) required\n");
-        return -1;
-    }
-
-    printf("Part 1: %d\n", part1(argv[1]));
-    printf("Part 2: %d\n", part2(argv[1]));
-
+    assert(0);
     return 0;
-}*/
+}
