@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-void print_program(int program_length, Intcode_t *program)
+void print_program(const int program_length, Intcode_t const * const program)
 {
     if(program_length > 0)
     {
@@ -19,11 +19,43 @@ void print_program(int program_length, Intcode_t *program)
     }
 }
 
-int read_intcode(Intcode_t *program, const char *filename)
+int read_intcode(Intcode_t *program, char const * const filename)
 {
     program->pc = 0;
     program->relative_base = 0;
     return read_csv_line(filename, program->program, INTCODE_BUFFER_SIZE);
+}
+
+static long get_param(const int mode, const int offset, Intcode_t const * const program)
+{
+    long const * const intcode = program->program;
+
+    // position mode
+    if (mode == 0)
+    {
+        assert(program->pc + offset < INTCODE_BUFFER_SIZE);
+        assert(intcode[program->pc + offset] < INTCODE_BUFFER_SIZE);
+        return intcode[intcode[program->pc + offset]];
+    }
+
+    // immediate mode
+    else if(mode == 1)
+    {
+        assert(program->pc + offset < INTCODE_BUFFER_SIZE);
+        return intcode[program->pc + offset];
+    }
+
+    // relative mode
+    else if(mode == 2)
+    {
+        assert(program->pc + offset < INTCODE_BUFFER_SIZE);
+        assert(0 <= intcode[program->pc + offset] + program->relative_base &&
+                    intcode[program->pc + offset] + program->relative_base < INTCODE_BUFFER_SIZE);
+        return intcode[intcode[program->pc + offset] + program->relative_base];
+    }
+
+    // should never get here
+    assert(0);
 }
 
 IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *input_buffer)
@@ -35,22 +67,22 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
 
     while(intcode[program->pc] != 99)
     {
-        long mode1 = (intcode[program->pc] % 1000) / 100;
-        long mode2 = (intcode[program->pc] % 10000) / 1000;
+        int mode1 = (intcode[program->pc] % 1000) / 100;
+        int mode2 = (intcode[program->pc] % 10000) / 1000;
         switch(intcode[program->pc] % 100)
         {
             case 1: // add
             {
-                long param1 = (mode1 ? intcode[program->pc + 1] : intcode[intcode[program->pc + 1]]);
-                long param2 = (mode2 ? intcode[program->pc + 2] : intcode[intcode[program->pc + 2]]);
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
                 intcode[intcode[program->pc + 3]] = param1 + param2;
                 program->pc += 4;
                 break;
             }
             case 2: // multiply
             {
-                int param1 = (mode1 ? intcode[program->pc + 1] : intcode[intcode[program->pc + 1]]);
-                int param2 = (mode2 ? intcode[program->pc + 2] : intcode[intcode[program->pc + 2]]);
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
                 intcode[intcode[program->pc + 3]] = param1 * param2;
                 program->pc += 4;
                 break;
@@ -58,20 +90,22 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
             case 3: // input
             {
                 assert(state.input_used < input_length);
+                assert(program->pc + 1 < INTCODE_BUFFER_SIZE);
+                assert(intcode[program->pc + 1] < INTCODE_BUFFER_SIZE);
                 intcode[intcode[program->pc + 1]] = input_buffer[state.input_used++];
                 program->pc += 2;
                 break;
             }
             case 4: // output
             {
-                state.retval = (mode1 ? intcode[program->pc + 1] : intcode[intcode[program->pc + 1]]);
+                state.retval = get_param(mode1, 1, program);
                 program->pc += 2;
                 return state;
             }
             case 5: // jump if true
             {
-                int param1 = (mode1 ? intcode[program->pc + 1] : intcode[intcode[program->pc + 1]]);
-                int param2 = (mode2 ? intcode[program->pc + 2] : intcode[intcode[program->pc + 2]]);
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
                 if(param1)
                 {
                     program->pc = param2;
@@ -84,8 +118,8 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
             }
             case 6: // jump if false
             {
-                int param1 = (mode1 ? intcode[program->pc + 1] : intcode[intcode[program->pc + 1]]);
-                int param2 = (mode2 ? intcode[program->pc + 2] : intcode[intcode[program->pc + 2]]);
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
                 if(!param1)
                 {
                     program->pc = param2;
@@ -98,18 +132,25 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
             }
             case 7: // less than
             {
-                int param1 = (mode1 ? intcode[program->pc + 1] : intcode[intcode[program->pc + 1]]);
-                int param2 = (mode2 ? intcode[program->pc + 2] : intcode[intcode[program->pc + 2]]);
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
                 intcode[intcode[program->pc + 3]] = (param1 < param2);
                 program->pc += 4;
                 break;
             }
             case 8: // equals
             {
-                int param1 = (mode1 ? intcode[program->pc + 1] : intcode[intcode[program->pc + 1]]);
-                int param2 = (mode2 ? intcode[program->pc + 2] : intcode[intcode[program->pc + 2]]);
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
                 intcode[intcode[program->pc + 3]] = (param1 == param2);
                 program->pc += 4;
+                break;
+            }
+            case 9: // adjust relative base
+            {
+                assert(program->pc + 1 < INTCODE_BUFFER_SIZE);
+                program->relative_base += intcode[program->pc + 1];
+                program->pc += 2;
                 break;
             }
             default:

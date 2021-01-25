@@ -22,12 +22,12 @@ typedef struct Intcode
 } Intcode_t;
 
 // Prints the first [program_length] items in the intcode program buffer
-void print_program(int program_length, Intcode_t *program);
+void print_program(const int program_length, Intcode_t const * const program);
 
 // Reads in an intcode program from the provided CSV file
 // Initializes program counter and relative base of the intcode program to zero
 // Returns the length of the intcode program if successful
-int read_intcode(Intcode_t *program, const char *filename);
+int read_intcode(Intcode_t *program, char const * const filename);
 
 // Runs an intcode program using the provided input until it produces an output,
 // or until it halts.
