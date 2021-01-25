@@ -31,7 +31,7 @@ static long get_param(const int mode, const int offset, Intcode_t const * const 
     long const * const intcode = program->program;
 
     // position mode
-    if (mode == 0)
+    if(mode == 0)
     {
         assert(program->pc + offset < INTCODE_BUFFER_SIZE);
         assert(intcode[program->pc + offset] < INTCODE_BUFFER_SIZE);
@@ -58,6 +58,19 @@ static long get_param(const int mode, const int offset, Intcode_t const * const 
     assert(0);
 }
 
+static long get_index(const int mode, const int offset, Intcode_t const * const program)
+{
+    long const * const intcode = program->program;
+
+    assert(mode == 2 || mode == 0);
+    long base = (mode == 2 ? program->relative_base : 0);
+
+    assert(program->pc + offset < INTCODE_BUFFER_SIZE);
+    assert(intcode[program->pc + offset] + base < INTCODE_BUFFER_SIZE);
+
+    return intcode[program->pc + offset] + base;
+}
+
 IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *input_buffer)
 {
     IntcodeReturn_t state;
@@ -69,13 +82,14 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
     {
         int mode1 = (intcode[program->pc] % 1000) / 100;
         int mode2 = (intcode[program->pc] % 10000) / 1000;
+        int mode3 = (intcode[program->pc] % 100000) / 10000;
         switch(intcode[program->pc] % 100)
         {
             case 1: // add
             {
                 long param1 = get_param(mode1, 1, program);
                 long param2 = get_param(mode2, 2, program);
-                intcode[intcode[program->pc + 3]] = param1 + param2;
+                intcode[get_index(mode3, 3, program)] = param1 + param2;
                 program->pc += 4;
                 break;
             }
@@ -83,16 +97,14 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
             {
                 long param1 = get_param(mode1, 1, program);
                 long param2 = get_param(mode2, 2, program);
-                intcode[intcode[program->pc + 3]] = param1 * param2;
+                intcode[get_index(mode3, 3, program)] = param1 * param2;
                 program->pc += 4;
                 break;
             }
             case 3: // input
             {
                 assert(state.input_used < input_length);
-                assert(program->pc + 1 < INTCODE_BUFFER_SIZE);
-                assert(intcode[program->pc + 1] < INTCODE_BUFFER_SIZE);
-                intcode[intcode[program->pc + 1]] = input_buffer[state.input_used++];
+                intcode[get_index(mode1, 1, program)] = input_buffer[state.input_used++];
                 program->pc += 2;
                 break;
             }
@@ -134,7 +146,7 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
             {
                 long param1 = get_param(mode1, 1, program);
                 long param2 = get_param(mode2, 2, program);
-                intcode[intcode[program->pc + 3]] = (param1 < param2);
+                intcode[get_index(mode3, 3, program)] = (param1 < param2);
                 program->pc += 4;
                 break;
             }
@@ -142,14 +154,14 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
             {
                 long param1 = get_param(mode1, 1, program);
                 long param2 = get_param(mode2, 2, program);
-                intcode[intcode[program->pc + 3]] = (param1 == param2);
+                intcode[get_index(mode3, 3, program)] = (param1 == param2);
                 program->pc += 4;
                 break;
             }
             case 9: // adjust relative base
             {
-                assert(program->pc + 1 < INTCODE_BUFFER_SIZE);
-                program->relative_base += intcode[program->pc + 1];
+                long param = get_param(mode1, 1, program);
+                program->relative_base += param;
                 program->pc += 2;
                 break;
             }

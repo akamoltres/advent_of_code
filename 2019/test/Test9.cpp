@@ -11,8 +11,8 @@ TEST_GROUP(DAY_9)
 
 TEST(DAY_9, TEST_SOL)
 {
-    // CHECK_EQUAL(4511442, solve_2019_5("input/5.txt", 1));
-    // CHECK_EQUAL(12648139, solve_2019_5("input/5.txt", 5));
+    CHECK_EQUAL(3235019597, solve_2019_9("input/9.txt", 1));
+    CHECK_EQUAL(80274, solve_2019_9("input/9.txt", 2));
 };
 
 TEST_GROUP_BASE(INTCODE_DAY9, IntcodeTest_t)

@@ -5,7 +5,7 @@ extern "C"
 {
 #endif
 
-#define INTCODE_BUFFER_SIZE 2000
+#define INTCODE_BUFFER_SIZE 5000
 
 typedef struct IntcodeReturn
 {
@@ -18,7 +18,7 @@ typedef struct Intcode
 {
     long program[INTCODE_BUFFER_SIZE];
     int pc;
-    int relative_base;
+    long relative_base;
 } Intcode_t;
 
 // Prints the first [program_length] items in the intcode program buffer
