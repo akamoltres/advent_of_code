@@ -1,178 +1,178 @@
 
 #include "intcode.h"
+#include "io.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
-void print_program(int program_length, int *buffer)
+void print_program(const int program_length, Intcode_t const * const program)
 {
     if(program_length > 0)
     {
-        printf("%d\n", buffer[0]);
+        printf("%ld\n", program->program[0]);
         for(int i = 1; i < program_length; ++i)
         {
-            printf(" %d", buffer[i]);
+            printf(" %ld", program->program[i]);
         }
         printf("\n");
     }
 }
 
-int read_intcode(const int bufsize, int *buffer, const char *filename)
+int read_intcode(Intcode_t *program, char const * const filename)
 {
-    int program_length = 0;
-
-    FILE *fp;
-    fp = fopen(filename, "r");
-
-    if(fp == NULL)
-    {
-        return -1;
-    }
-
-    int done = 0;
-    while(1)
-    {
-        int value = 0;
-        char c[2];
-        int negative = 0;
-        while(fgets(c, 2, fp))
-        {
-            if(c[0] == '-')
-            {
-                negative = 1;
-                continue;
-            }
-
-            if(c[0] == ',')
-            {
-                break;
-            }
-
-            if(c[0] == '\n' || feof(fp))
-            {
-                done = 1;
-                break;
-            }
-
-            value = (value * 10) + (c[0] - '0');
-        }
-
-        buffer[program_length++] = value * (negative ? -1 : 1);
-
-        if(done)
-        {
-            fclose(fp);
-            return program_length;
-        }
-
-        if(program_length == bufsize)
-        {
-            return -2;
-        }
-    }
+    program->pc = 0;
+    program->relative_base = 0;
+    return read_csv_line(filename, program->program, INTCODE_BUFFER_SIZE);
 }
 
-IntcodeReturn_t run_intcode(const int program_length, const int bufsize, int *buffer, const int input_length, int *input_buffer, int pc)
+static long get_param(const int mode, const int offset, Intcode_t const * const program)
+{
+    long const * const intcode = program->program;
+
+    // position mode
+    if(mode == 0)
+    {
+        assert(program->pc + offset < INTCODE_BUFFER_SIZE);
+        assert(intcode[program->pc + offset] < INTCODE_BUFFER_SIZE);
+        return intcode[intcode[program->pc + offset]];
+    }
+
+    // immediate mode
+    else if(mode == 1)
+    {
+        assert(program->pc + offset < INTCODE_BUFFER_SIZE);
+        return intcode[program->pc + offset];
+    }
+
+    // relative mode
+    else if(mode == 2)
+    {
+        assert(program->pc + offset < INTCODE_BUFFER_SIZE);
+        assert(0 <= intcode[program->pc + offset] + program->relative_base &&
+                    intcode[program->pc + offset] + program->relative_base < INTCODE_BUFFER_SIZE);
+        return intcode[intcode[program->pc + offset] + program->relative_base];
+    }
+
+    // should never get here
+    assert(0);
+}
+
+static long get_index(const int mode, const int offset, Intcode_t const * const program)
+{
+    long const * const intcode = program->program;
+
+    assert(mode == 2 || mode == 0);
+    long base = (mode == 2 ? program->relative_base : 0);
+
+    assert(program->pc + offset < INTCODE_BUFFER_SIZE);
+    assert(intcode[program->pc + offset] + base < INTCODE_BUFFER_SIZE);
+
+    return intcode[program->pc + offset] + base;
+}
+
+IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *input_buffer)
 {
     IntcodeReturn_t state;
     memset(&state, 0, sizeof(IntcodeReturn_t));
-    state.pc = pc;
 
-    while(buffer[state.pc] != 99)
+    long *intcode = program->program;
+
+    while(intcode[program->pc] != 99)
     {
-        int mode1 = (buffer[state.pc] % 1000) / 100;
-        int mode2 = (buffer[state.pc] % 10000) / 1000;
-        switch(buffer[state.pc] % 100)
+        int mode1 = (intcode[program->pc] % 1000) / 100;
+        int mode2 = (intcode[program->pc] % 10000) / 1000;
+        int mode3 = (intcode[program->pc] % 100000) / 10000;
+        switch(intcode[program->pc] % 100)
         {
             case 1: // add
             {
-                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
-                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
-                buffer[buffer[state.pc + 3]] = param1 + param2;
-                state.pc += 4;
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
+                intcode[get_index(mode3, 3, program)] = param1 + param2;
+                program->pc += 4;
                 break;
             }
             case 2: // multiply
             {
-                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
-                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
-                buffer[buffer[state.pc + 3]] = param1 * param2;
-                state.pc += 4;
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
+                intcode[get_index(mode3, 3, program)] = param1 * param2;
+                program->pc += 4;
                 break;
             }
             case 3: // input
             {
-                if(state.input_used == input_length)
-                {
-                    state.halt = -1;
-                    return state;
-                }
-                buffer[buffer[state.pc + 1]] = input_buffer[state.input_used++];
-                state.pc += 2;
+                assert(state.input_used < input_length);
+                intcode[get_index(mode1, 1, program)] = input_buffer[state.input_used++];
+                program->pc += 2;
                 break;
             }
             case 4: // output
             {
-                state.retval = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
-                state.pc += 2;
+                state.retval = get_param(mode1, 1, program);
+                program->pc += 2;
                 return state;
             }
             case 5: // jump if true
             {
-                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
-                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
                 if(param1)
                 {
-                    state.pc = param2;
+                    program->pc = param2;
                 }
                 else
                 {
-                    state.pc += 3;
+                    program->pc += 3;
                 }
                 break;
             }
             case 6: // jump if false
             {
-                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
-                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
                 if(!param1)
                 {
-                    state.pc = param2;
+                    program->pc = param2;
                 }
                 else
                 {
-                    state.pc += 3;
+                    program->pc += 3;
                 }
                 break;
             }
             case 7: // less than
             {
-                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
-                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
-                buffer[buffer[state.pc + 3]] = (param1 < param2);
-                state.pc += 4;
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
+                intcode[get_index(mode3, 3, program)] = (param1 < param2);
+                program->pc += 4;
                 break;
             }
             case 8: // equals
             {
-                int param1 = (mode1 ? buffer[state.pc + 1] : buffer[buffer[state.pc + 1]]);
-                int param2 = (mode2 ? buffer[state.pc + 2] : buffer[buffer[state.pc + 2]]);
-                buffer[buffer[state.pc + 3]] = (param1 == param2);
-                state.pc += 4;
+                long param1 = get_param(mode1, 1, program);
+                long param2 = get_param(mode2, 2, program);
+                intcode[get_index(mode3, 3, program)] = (param1 == param2);
+                program->pc += 4;
+                break;
+            }
+            case 9: // adjust relative base
+            {
+                long param = get_param(mode1, 1, program);
+                program->relative_base += param;
+                program->pc += 2;
                 break;
             }
             default:
             {
-                state.halt = -1;
-                return state;
+                // shouldn't get here
+                assert(0);
             }
         }
 
-        if(state.pc >= bufsize)
-        {
-            state.halt = -1;
-            return state;
-        }
+        assert(program->pc < INTCODE_BUFFER_SIZE);
     }
 
     state.halt = 1;

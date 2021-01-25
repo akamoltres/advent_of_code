@@ -20,7 +20,6 @@ all: build_dir $(SOL_OBJ_FILES)
 .PHONY: test
 test: build_dir $(TEST_OBJ_FILES) $(SOL_OBJ_FILES) $(LIB_OBJ_FILES)
 	@$(CXX) -o $(BUILD_DIR)/tests.out $(addprefix $(BUILD_DIR)/,$(notdir $(TEST_OBJ_FILES))) $(addprefix $(BUILD_DIR)/,$(notdir $(SOL_OBJ_FILES))) $(addprefix $(BUILD_DIR)/,$(notdir $(LIB_OBJ_FILES))) $(CPPFLAGS) $(LD_LIBRARIES)
-	@./$(BUILD_DIR)/tests.out
 
 .PHONY: clean
 clean:
