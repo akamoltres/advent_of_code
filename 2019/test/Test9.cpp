@@ -47,9 +47,12 @@ TEST(INTCODE_DAY9, TEST0)
     long initial_program[program_length] = {109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99};
 
     // TODO Go through intcode test and make a function to make this a one-liner
+    // TODO make sure that function zeros *everything* before copying the program in
+    //          a la memset(program, 0, sizeof(Intcode_t));
     Intcode_t program;
     program.pc = 0;
     program.relative_base = 0;
+    memset(program.program, 0, INTCODE_BUFFER_SIZE * sizeof(long));
     memcpy(program.program, initial_program, program_length * sizeof(long));
 
     (void) test_program(&program,
@@ -66,6 +69,7 @@ TEST(INTCODE_DAY9, TEST1)
     Intcode_t program;
     program.pc = 0;
     program.relative_base = 0;
+    memset(program.program, 0, INTCODE_BUFFER_SIZE * sizeof(long));
     memcpy(program.program, initial_program, program_length * sizeof(long));
 
     IntcodeReturn_t retval = run_intcode(&program, 0, NULL);
@@ -86,6 +90,7 @@ TEST(INTCODE_DAY9, TEST2)
     Intcode_t program;
     program.pc = 0;
     program.relative_base = 0;
+    memset(program.program, 0, INTCODE_BUFFER_SIZE * sizeof(long));
     memcpy(program.program, initial_program, program_length * sizeof(long));
 
     (void) test_program(&program,
