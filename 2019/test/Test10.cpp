@@ -9,6 +9,7 @@ TEST_GROUP(DAY_10)
 TEST(DAY_10, TEST_SOL)
 {
     CHECK_EQUAL(227, solve_2019_10_1("input/10.txt"));
+    CHECK_EQUAL(604, solve_2019_10_2("input/10.txt"));
 }
 
 TEST(DAY_10, TEST_0)
@@ -34,4 +35,5 @@ TEST(DAY_10, TEST_3)
 TEST(DAY_10, TEST_4)
 {
     CHECK_EQUAL(210, solve_2019_10_1("input/10_test4.txt"));
+    CHECK_EQUAL(802, solve_2019_10_2("input/10_test4.txt"));
 }
