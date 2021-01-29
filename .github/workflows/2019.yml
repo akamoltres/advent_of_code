@@ -14,7 +14,7 @@ jobs:
           - name: Run clang-format and check output
             working-directory: ./2019
             run: |
-              find . -name *.h -o -name *.c -o -name *.hpp -o -name *.cpp | xargs clang-format-10 > clang-format.out |
+              find . -name *.h -o -name *.c -o -name *.hpp -o -name *.cpp | xargs clang-format-10 > clang-format.out
               [ ! -s clang-format.out ]
     ci-test:
         name: Run automated CI tests
