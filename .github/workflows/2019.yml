@@ -13,6 +13,7 @@ jobs:
             run: sudo apt-get install clang-format
           - name: Run clang format and check output
             run: |
+              clang-format --version |
               find . -name *.h -o -name *.c -o -name *.hpp -o -name *.cpp | xargs clang-format > clang-format.out |
               [ ! -s clang-format.out ]
     ci-test:
