@@ -14,17 +14,18 @@ typedef struct StationLocation
     int in_view;
 } StationLocation_t;
 
-int count_asteroids_in_view(char map[MAX_DIM_STR_ARR][MAX_DIM_STR_ARR], int rc, int cc, int row, int col)
+int count_asteroids_in_view(char map[MAX_DIM_STR_ARR][MAX_DIM_STR_ARR], int rc, int cc, int row,
+                            int col)
 {
     int count = 0;
 
     // try all the other asteroids
-    for(int r = 0; r < rc; ++r)
+    for (int r = 0; r < rc; ++r)
     {
-        for(int c = 0; c < cc; ++c)
+        for (int c = 0; c < cc; ++c)
         {
             // not the one with the station, there is an asteroid there
-            if(!(r == row && c == col) && map[r][c] == '#')
+            if (!(r == row && c == col) && map[r][c] == '#')
             {
                 int visible = 1;
 
@@ -33,9 +34,9 @@ int count_asteroids_in_view(char map[MAX_DIM_STR_ARR][MAX_DIM_STR_ARR], int rc, 
                 int div = gcd(abs(r - row), abs(c - col));
                 int dr = (r - row) / div;
                 int dc = (c - col) / div;
-                for(int i = 1; i * dr != (r - row) || i * dc != (c - col); ++i)
+                for (int i = 1; i * dr != (r - row) || i * dc != (c - col); ++i)
                 {
-                    if(map[row + dr * i][col + dc * i] == '#')
+                    if (map[row + dr * i][col + dc * i] == '#')
                     {
                         visible = 0;
                     }
@@ -49,7 +50,8 @@ int count_asteroids_in_view(char map[MAX_DIM_STR_ARR][MAX_DIM_STR_ARR], int rc, 
     return count;
 }
 
-StationLocation_t get_station_location(char map[MAX_DIM_STR_ARR][MAX_DIM_STR_ARR], int rows, int cols)
+StationLocation_t get_station_location(char map[MAX_DIM_STR_ARR][MAX_DIM_STR_ARR], int rows,
+                                       int cols)
 {
     StationLocation_t retval = {
         .r = 0,
@@ -58,14 +60,14 @@ StationLocation_t get_station_location(char map[MAX_DIM_STR_ARR][MAX_DIM_STR_ARR
     };
 
     // count number of visible asteroids from each asteroid
-    for(int r = 0; r < rows; ++r)
+    for (int r = 0; r < rows; ++r)
     {
-        for(int c = 0; c < rows; ++c)
+        for (int c = 0; c < rows; ++c)
         {
-            if(map[r][c] == '#')
+            if (map[r][c] == '#')
             {
                 int asteroid_count = count_asteroids_in_view(map, rows, cols, r, c);
-                if(asteroid_count > retval.in_view)
+                if (asteroid_count > retval.in_view)
                 {
                     retval.r = r;
                     retval.c = c;
@@ -113,18 +115,19 @@ int solve_2019_10_2(char const *input_filename)
     // make a list of all the asteroids that we need to vaporize
     Asteroid_t asteroids[MAX_NUM_ASTEROIDS];
     int num_asteroids = 0;
-    for(int r = 0; r < rows; ++r)
+    for (int r = 0; r < rows; ++r)
     {
-        for(int c = 0; c < cols; ++c)
+        for (int c = 0; c < cols; ++c)
         {
-            if(map[r][c] == '#' && !(r == station.r && c == station.c))
+            if (map[r][c] == '#' && !(r == station.r && c == station.c))
             {
                 asteroids[num_asteroids].r = r;
                 asteroids[num_asteroids].c = c;
                 asteroids[num_asteroids].dx = (station.r - r);
                 asteroids[num_asteroids].dy = (station.c - c);
-                asteroids[num_asteroids].angle = atan2(asteroids[num_asteroids].dy, asteroids[num_asteroids].dx);
-                if(asteroids[num_asteroids].angle < EPSILON)
+                asteroids[num_asteroids].angle =
+                    atan2(asteroids[num_asteroids].dy, asteroids[num_asteroids].dx);
+                if (asteroids[num_asteroids].angle < EPSILON)
                 {
                     asteroids[num_asteroids].angle += 2 * M_PI;
                 }
@@ -137,20 +140,20 @@ int solve_2019_10_2(char const *input_filename)
     }
 
     // sort all the asteroids by angle (and if equal angle, by distance)
-    for(int i = 0; i < num_asteroids; ++i)
+    for (int i = 0; i < num_asteroids; ++i)
     {
-        for(int j = 0; j + 1 < num_asteroids; ++j)
+        for (int j = 0; j + 1 < num_asteroids; ++j)
         {
-            if(fabs(asteroids[j].angle - asteroids[j + 1].angle) < EPSILON)
+            if (fabs(asteroids[j].angle - asteroids[j + 1].angle) < EPSILON)
             {
-                if(asteroids[j].dist > asteroids[j + 1].dist)
+                if (asteroids[j].dist > asteroids[j + 1].dist)
                 {
                     Asteroid_t temp = asteroids[j + 1];
                     asteroids[j + 1] = asteroids[j];
                     asteroids[j] = temp;
                 }
             }
-            else if(asteroids[j].angle < asteroids[j + 1].angle)
+            else if (asteroids[j].angle < asteroids[j + 1].angle)
             {
                 Asteroid_t temp = asteroids[j + 1];
                 asteroids[j + 1] = asteroids[j];
@@ -163,12 +166,13 @@ int solve_2019_10_2(char const *input_filename)
     int idx = 0;
     int vaporized = 0;
     int retval = 0;
-    while(vaporized < 200)
+    while (vaporized < 200)
     {
         retval = asteroids[idx].c * 100 + asteroids[idx].r;
         asteroids[idx].vaporized = 1;
-        while(asteroids[idx].vaporized == 1 ||
-              fabs(asteroids[((idx - 1) + num_asteroids) % num_asteroids].angle - asteroids[idx].angle) < EPSILON)
+        while (asteroids[idx].vaporized == 1 ||
+               fabs(asteroids[((idx - 1) + num_asteroids) % num_asteroids].angle -
+                    asteroids[idx].angle) < EPSILON)
         {
             idx += 1;
         }

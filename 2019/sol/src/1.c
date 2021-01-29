@@ -8,12 +8,12 @@ unsigned long solve_2019_1_1(char const *input_filename)
 
     FILE *fp;
     fp = fopen(input_filename, "r");
-    while(fscanf(fp, "%lu", &module_mass) == 1)
+    while (fscanf(fp, "%lu", &module_mass) == 1)
     {
         total_fuel += module_mass / 3 - 2;
     }
     fclose(fp);
-    
+
     return total_fuel;
 }
 
@@ -24,17 +24,17 @@ long solve_2019_1_2(char const *input_filename)
 
     FILE *fp;
     fp = fopen(input_filename, "r");
-    while(fscanf(fp, "%lu", &module_mass) == 1)
+    while (fscanf(fp, "%lu", &module_mass) == 1)
     {
         long fuel_to_add = module_mass / 3 - 2;
-        while(fuel_to_add > 0)
+        while (fuel_to_add > 0)
         {
             total_fuel += fuel_to_add;
             fuel_to_add = fuel_to_add / 3 - 2;
         }
     }
     fclose(fp);
-    
+
     return total_fuel;
 }
 
