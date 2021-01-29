@@ -2,11 +2,13 @@
 #include "CppUTest/TestHarness.h"
 #include "io.h"
 
-TEST_GROUP(IO)
+#include <string.h>
+
+TEST_GROUP(IO_CSV_LINE)
 {
 };
 
-TEST(IO, IO_0)
+TEST(IO_CSV_LINE, CSV_LINE_0)
 {
     long buffer[1000];
     int num_inputs = read_csv_line("input/2.txt", buffer, 1000);
@@ -19,7 +21,7 @@ TEST(IO, IO_0)
     }
 }
 
-TEST(IO, IO_1)
+TEST(IO_CSV_LINE, CSV_LINE_1)
 {
     long buffer[1000];
     int num_inputs = read_csv_line("input/7_test3.txt", buffer, 1000);
@@ -30,4 +32,22 @@ TEST(IO, IO_1)
     {
         CHECK_EQUAL(expected_buffer[i], buffer[i]);
     }
+}
+
+TEST_GROUP(IO_STR_LINES)
+{
+};
+
+TEST(IO_STR_LINES, STR_LINES_0)
+{
+    char buffer[MAX_DIM_STR_ARR][MAX_DIM_STR_ARR];
+
+    int num_lines = read_str_lines("input/10_test0.txt", buffer);
+
+    CHECK_EQUAL(5, num_lines);
+    CHECK_EQUAL(0, strcmp(".#..#\n", buffer[0]));
+    CHECK_EQUAL(0, strcmp(".....\n", buffer[1]));
+    CHECK_EQUAL(0, strcmp("#####\n", buffer[2]));
+    CHECK_EQUAL(0, strcmp("....#\n", buffer[3]));
+    CHECK_EQUAL(0, strcmp("...##\n", buffer[4]));
 }
