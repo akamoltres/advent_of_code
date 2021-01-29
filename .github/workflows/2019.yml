@@ -3,6 +3,18 @@ name: 2019-ci
 on: [push]
 
 jobs:
+    ci-lint:
+        name: Run clang-format
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+          - name: Install prerequisites
+            run: sudo apt-get install clang-format
+          - name: Run clang format and check output
+            run: |
+              find . -name *.h -o -name *.c -o -name *.hpp -o -name *.cpp | xargs clang-format > clang-format.out |
+              [ ! -s clang-format.out ]
     ci-test:
         name: Run automated CI tests
         runs-on: ubuntu-latest
