@@ -21,7 +21,7 @@ int read_csv_line(const char *filename, long *buffer, int bufsize)
 
     char *tok;
     tok = strtok(c_buffer, ", \n");
-    while(tok != NULL)
+    while (tok != NULL)
     {
         assert(count < bufsize);
         buffer[count++] = atoi(tok);
@@ -44,7 +44,7 @@ int read_str_lines(const char *filename, char array_in[MAX_DIM_STR_ARR][MAX_DIM_
     size_t input_bufsize = 0;
     int num_lines = 0;
 
-    while(getline(&input_buffer, &input_bufsize, fp) != -1)
+    while (getline(&input_buffer, &input_bufsize, fp) != -1)
     {
         assert(strlen(input_buffer) < MAX_DIM_STR_ARR);
         assert(num_lines < MAX_DIM_STR_ARR);

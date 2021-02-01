@@ -2,9 +2,7 @@
 #include "CppUTest/TestHarness.h"
 #include "sol.h"
 
-TEST_GROUP(DAY_1)
-{
-};
+TEST_GROUP(DAY_1){};
 
 TEST(DAY_1, TEST_SOL)
 {

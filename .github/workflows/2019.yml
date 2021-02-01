@@ -3,6 +3,19 @@ name: 2019-ci
 on: [push]
 
 jobs:
+    ci-lint:
+        name: Run clang-format
+        runs-on: ubuntu-latest
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+            with:
+              submodules: recursive
+          - name: Install prerequisites
+            run: sudo apt-get install clang-format-10
+          - name: Run linter
+            working-directory: ./2019
+            run: python3 ./run-clang-format/run-clang-format.py -r lib sol test --clang-format-executable /usr/bin/clang-format-10 --style file
     ci-test:
         name: Run automated CI tests
         runs-on: ubuntu-latest

@@ -16,11 +16,11 @@ long solve_2019_5(char *input_filename, long input)
     assert(program_length > 0);
 
     long final_output;
-    while(1)
+    while (1)
     {
         IntcodeReturn_t retval = run_intcode(&program, input_bufsize, input_buffer);
 
-        if(retval.halt)
+        if (retval.halt)
         {
             break;
         }
