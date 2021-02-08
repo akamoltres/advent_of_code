@@ -25,6 +25,14 @@ test: build_dir $(TEST_OBJ_FILES) $(SOL_OBJ_FILES) $(LIB_OBJ_FILES)
 clean:
 	@rm -rf $(BUILD_DIR)
 
+.PHONY: lint
+lint:
+	@find . -name *.h -o -name *.c -o -name *.hpp -o -name *.cpp | xargs clang-format-10 --style file --dry-run
+
+.PHONY: lint-i
+lint-i:
+	@find . -name *.h -o -name *.c -o -name *.hpp -o -name *.cpp | xargs clang-format-10 --style file -i
+
 %.o: %.c $(DEPS)
 	@$(CC) -c -o $(BUILD_DIR)/$(notdir $@) $< $(CFLAGS)
 
