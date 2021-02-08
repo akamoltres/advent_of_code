@@ -10,12 +10,6 @@ int gcd(int a, int b)
     return a;
 }
 
-long min(long a, long b)
-{
-    return (a < b ? a : b);
-}
+long min(long a, long b) { return (a < b ? a : b); }
 
-long max(long a, long b)
-{
-    return (a > b ? a : b);
-}
+long max(long a, long b) { return (a > b ? a : b); }

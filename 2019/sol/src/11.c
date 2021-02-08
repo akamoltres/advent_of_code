@@ -40,7 +40,7 @@ long solve_2019_11_1(char *input_filename)
     IntcodeReturn_t retval;
 
     // run the robot
-    while(1)
+    while (1)
     {
         // get the updated color for the current panel
         input_buffer[0] = panel_colors[row][col];
@@ -48,10 +48,10 @@ long solve_2019_11_1(char *input_filename)
 
         // update the color for the panel
         assert(retval.retval == BLACK || retval.retval == WHITE);
-        panel_colors[row][col] = (Color_t) retval.retval;
+        panel_colors[row][col] = (Color_t)retval.retval;
 
         // update the visited panels
-        if(!panel_visited[row][col])
+        if (!panel_visited[row][col])
         {
             visited_count += 1;
             panel_visited[row][col] = 1;
@@ -61,7 +61,7 @@ long solve_2019_11_1(char *input_filename)
         retval = run_intcode(&program, 0, NULL);
 
         // end condition
-        if(retval.halt)
+        if (retval.halt)
         {
             break;
         }
@@ -72,7 +72,7 @@ long solve_2019_11_1(char *input_filename)
         dir = (dir + 4) % 4;
 
         // update the robot location
-        switch(dir)
+        switch (dir)
         {
             case 0:
                 row -= 1;
@@ -124,7 +124,7 @@ char *solve_2019_11_2(char *input_filename)
     IntcodeReturn_t retval;
 
     // run the robot
-    while(1)
+    while (1)
     {
         // update the fence
         row_boundaries[0] = min(row_boundaries[0], row);
@@ -138,13 +138,13 @@ char *solve_2019_11_2(char *input_filename)
 
         // update the color for the panel
         assert(retval.retval == BLACK || retval.retval == WHITE);
-        panel_colors[row][col] = (Color_t) retval.retval;
+        panel_colors[row][col] = (Color_t)retval.retval;
 
         // get the new direction of the robot
         retval = run_intcode(&program, 0, NULL);
 
         // end condition
-        if(retval.halt)
+        if (retval.halt)
         {
             break;
         }
@@ -155,7 +155,7 @@ char *solve_2019_11_2(char *input_filename)
         dir = (dir + 4) % 4;
 
         // update the robot location
-        switch(dir)
+        switch (dir)
         {
             case 0:
                 row -= 1;
@@ -179,12 +179,12 @@ char *solve_2019_11_2(char *input_filename)
     // assemble the result
     int num_rows = row_boundaries[1] - row_boundaries[0] + 1;
     int num_cols = col_boundaries[1] - col_boundaries[0] + 1;
-    char *reg_id = (char *) malloc((num_rows * (num_cols + 1) + 1) * sizeof(char));
+    char *reg_id = (char *)malloc((num_rows * (num_cols + 1) + 1) * sizeof(char));
     memset(reg_id, 0, (num_rows * (num_cols + 1) + 1) * sizeof(char));
     int idx = 0;
-    for(int r = row_boundaries[0]; r <= row_boundaries[1]; ++r)
+    for (int r = row_boundaries[0]; r <= row_boundaries[1]; ++r)
     {
-        for(int c = col_boundaries[0]; c <= col_boundaries[1]; ++c)
+        for (int c = col_boundaries[0]; c <= col_boundaries[1]; ++c)
         {
             reg_id[idx++] = (panel_colors[r][c] == BLACK ? '.' : '#');
         }
