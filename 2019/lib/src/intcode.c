@@ -78,8 +78,11 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
 
     long *intcode = program->program;
 
+    assert(0 <= program->pc && program->pc < INTCODE_BUFFER_SIZE);
     while (intcode[program->pc] != 99)
     {
+        assert(0 <= program->pc && program->pc < INTCODE_BUFFER_SIZE);
+
         int mode1 = (intcode[program->pc] % 1000) / 100;
         int mode2 = (intcode[program->pc] % 10000) / 1000;
         int mode3 = (intcode[program->pc] % 100000) / 10000;
@@ -171,8 +174,6 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
                 assert(0);
             }
         }
-
-        assert(program->pc < INTCODE_BUFFER_SIZE);
     }
 
     state.halt = 1;

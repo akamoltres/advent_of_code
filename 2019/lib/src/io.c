@@ -24,7 +24,7 @@ int read_csv_line(const char *filename, long *buffer, int bufsize)
     while (tok != NULL)
     {
         assert(count < bufsize);
-        buffer[count++] = atoi(tok);
+        buffer[count++] = atol(tok);
         tok = strtok(NULL, ", \n");
     }
 
