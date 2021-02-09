@@ -35,6 +35,9 @@ int solve_2019_10_2(char const *input_filename);
 long solve_2019_11_1(char const *input_filename);
 char *solve_2019_11_2(char const *input_filename);
 
+long solve_2019_12_1(char const *input_filename, int num_moons);
+long solve_2019_12_2(char const *input_filename);
+
 #ifdef __cplusplus
 }
 #endif

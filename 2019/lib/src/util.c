@@ -1,5 +1,5 @@
 
-int gcd(int a, int b)
+long gcd(long a, long b)
 {
     while (b != 0)
     {
@@ -9,6 +9,8 @@ int gcd(int a, int b)
     }
     return a;
 }
+
+long lcm(long a, long b) { return (a * b / gcd(a, b)); }
 
 long min(long a, long b) { return (a < b ? a : b); }
 
