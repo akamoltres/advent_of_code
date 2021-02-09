@@ -4,7 +4,8 @@
 extern "C" {
 #endif
 
-int gcd(int a, int b);
+long gcd(long a, long b);
+long lcm(long a, long b);
 
 long min(long a, long b);
 long max(long a, long b);
