@@ -103,7 +103,7 @@ static char generate_command(Tile_t grid[GRID_HEIGHT][GRID_WIDTH])
                 ball_r = i;
                 ball_c = j;
             }
-            else if(grid[i][j] == PADDLE)
+            else if (grid[i][j] == PADDLE)
             {
                 paddle_c = j;
             }
@@ -127,7 +127,7 @@ static char generate_command(Tile_t grid[GRID_HEIGHT][GRID_WIDTH])
         {
             command = 'l';
         }
-        else if(paddle_c < ball_c)
+        else if (paddle_c < ball_c)
         {
             command = 'r';
         }
@@ -145,7 +145,7 @@ static char generate_command(Tile_t grid[GRID_HEIGHT][GRID_WIDTH])
         }
     }
     // moving right
-    else if(ball_c > prev_ball_c)
+    else if (ball_c > prev_ball_c)
     {
         if (grid[ball_r][ball_c + 1] == WALL || grid[ball_r][ball_c + 1] == BLOCK)
         {
@@ -215,7 +215,7 @@ long solve_2019_13_2(char *input_filename)
             }
             retval = run_intcode(&program, 1, input);
         }
-        else if(retval.halt)
+        else if (retval.halt)
         {
             return score;
         }
