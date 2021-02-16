@@ -21,8 +21,7 @@ void print_program(const int program_length, Intcode_t const *const program)
 
 int read_intcode(Intcode_t *program, char const *const filename)
 {
-    program->pc = 0;
-    program->relative_base = 0;
+    memset(program, 0, sizeof(Intcode_t));
     return read_csv_line(filename, program->program, INTCODE_BUFFER_SIZE);
 }
 
