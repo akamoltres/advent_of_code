@@ -18,7 +18,6 @@ typedef enum Color
 long solve_2019_11_1(char *input_filename)
 {
     Intcode_t program;
-    memset(program.program, 0, INTCODE_BUFFER_SIZE * sizeof(long)); // TODO go away
     assert(read_intcode(&program, input_filename) > 0);
 
     // black is 0, white is 1 (all panels start black)
@@ -99,7 +98,6 @@ long solve_2019_11_1(char *input_filename)
 char *solve_2019_11_2(char *input_filename)
 {
     Intcode_t program;
-    memset(program.program, 0, INTCODE_BUFFER_SIZE * sizeof(long)); // TODO go away
     assert(read_intcode(&program, input_filename) > 0);
 
     // black is 0, white is 1 (all panels start black)

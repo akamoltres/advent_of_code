@@ -24,7 +24,7 @@ typedef struct Intcode
 void print_program(const int program_length, Intcode_t const *const program);
 
 // Reads in an intcode program from the provided CSV file
-// Initializes program counter and relative base of the intcode program to zero
+// Zeros intcode program structure
 // Returns the length of the intcode program if successful
 int read_intcode(Intcode_t *program, char const *const filename);
 
