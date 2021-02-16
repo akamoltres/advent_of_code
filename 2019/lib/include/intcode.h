@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -11,6 +13,7 @@ typedef struct IntcodeReturn
     int input_used;
     long retval;
     int halt;
+    int need_input;
 } IntcodeReturn_t;
 
 typedef struct Intcode
@@ -18,6 +21,7 @@ typedef struct Intcode
     long program[INTCODE_BUFFER_SIZE];
     int pc;
     long relative_base;
+    bool interactive_mode;
 } Intcode_t;
 
 // Prints the first [program_length] items in the intcode program buffer
