@@ -105,6 +105,11 @@ IntcodeReturn_t run_intcode(Intcode_t *program, const int input_length, long *in
             }
             case 3: // input
             {
+                if (program->interactive_mode && state.input_used >= input_length)
+                {
+                    state.need_input = 1;
+                    return state;
+                }
                 assert(state.input_used < input_length);
                 intcode[get_index(mode1, 1, program)] = input_buffer[state.input_used++];
                 program->pc += 2;
