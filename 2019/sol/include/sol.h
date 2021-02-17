@@ -41,6 +41,8 @@ long solve_2019_12_2(char const *input_filename);
 long solve_2019_13_1(char const *input_filename);
 long solve_2019_13_2(char const *input_filename);
 
+int solve_2019_14_1(char const *input_filename);
+
 #ifdef __cplusplus
 }
 #endif
