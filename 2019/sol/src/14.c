@@ -1,5 +1,6 @@
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -106,7 +107,7 @@ static int get_chemical_index(const char *chemical, int reaction_count,
         }
     }
 
-    assert(0);
+    assert(false);
 }
 
 static void count_ore_required(const char *chemical, long num_required, int reaction_count,
@@ -123,14 +124,21 @@ static void count_ore_required(const char *chemical, long num_required, int reac
     chemical_stock[product_index] -= num_required;
 
     // generate more if needed
-    while (chemical_stock[product_index] < 0)
+    if (chemical_stock[product_index] < 0)
     {
-        chemical_stock[product_index] += reaction_list[product_index].product_qty;
+        long multiplier =
+            chemical_stock[product_index] / reaction_list[product_index].product_qty * -1;
+        if (chemical_stock[product_index] + reaction_list[product_index].product_qty * multiplier <
+            0)
+        {
+            multiplier += 1;
+        }
+        chemical_stock[product_index] += multiplier * reaction_list[product_index].product_qty;
         for (int i = 0; i < reaction_list[product_index].reactant_count; ++i)
         {
             count_ore_required(reaction_list[product_index].reactants[i],
-                               reaction_list[product_index].reactant_qtys[i], reaction_count,
-                               chemical_stock, reaction_list);
+                               multiplier * reaction_list[product_index].reactant_qtys[i],
+                               reaction_count, chemical_stock, reaction_list);
         }
     }
 }
@@ -149,4 +157,48 @@ long solve_2019_14_1(char const *input_filename)
     return chemical_stock[reaction_count];
 }
 
-long solve_2019_14_2(char const *input_filename) { return -1; }
+static bool enough_ore(long fuel_test, long available_ore, int reaction_count,
+                       Reaction_t reaction_list[MAX_NUM_CHEMICALS - 1])
+{
+    long chemical_stock[MAX_NUM_CHEMICALS] = {0};
+    count_ore_required("FUEL", fuel_test, reaction_count, chemical_stock, reaction_list);
+    return (chemical_stock[reaction_count] <= available_ore);
+}
+
+long solve_2019_14_2(char const *input_filename)
+{
+    // ORE is not created by a reaction
+    Reaction_t reaction_list[MAX_NUM_CHEMICALS - 1];
+    memset(reaction_list, 0, (MAX_NUM_CHEMICALS - 1) * sizeof(Reaction_t));
+
+    int reaction_count = get_input(input_filename, reaction_list);
+
+    const long available_ore = 1000000000000;
+    long fuel_lower_bound = 0;
+    long fuel_upper_bound = 1000000000000;
+
+    // verify that the upper bound is in fact an upper bound
+    assert(!enough_ore(fuel_upper_bound, available_ore, reaction_count, reaction_list));
+
+    // binary search
+    while (fuel_lower_bound != fuel_upper_bound)
+    {
+        long fuel_test = (fuel_lower_bound + fuel_upper_bound) / 2;
+        if (enough_ore(fuel_test, available_ore, reaction_count, reaction_list))
+        {
+            fuel_lower_bound = fuel_test;
+
+            // termination case
+            if (fuel_lower_bound + 1 == fuel_upper_bound)
+            {
+                fuel_upper_bound = fuel_lower_bound;
+            }
+        }
+        else
+        {
+            fuel_upper_bound = fuel_test;
+        }
+    }
+
+    return fuel_lower_bound;
+}

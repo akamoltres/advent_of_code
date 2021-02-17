@@ -8,6 +8,8 @@ TEST(DAY_14, TEST_SOL)
 {
     long part1 = solve_2019_14_1("input/14.txt");
     CHECK_EQUAL(612880, part1);
+    long part2 = solve_2019_14_2("input/14.txt");
+    CHECK_EQUAL(2509120, part2);
 }
 
 TEST(DAY_14, TEST_0)
