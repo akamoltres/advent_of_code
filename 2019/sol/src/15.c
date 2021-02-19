@@ -1,8 +1,8 @@
 
 #include "intcode.h"
+#include "util.h"
 
 #include <assert.h>
-#include <stdio.h>
 
 #define MAP_SIDELEN 50
 
@@ -125,8 +125,10 @@ static void shortest_dists(Square_t map[MAP_SIDELEN][MAP_SIDELEN],
     }
 }
 
-long solve_2019_15_1(char *input_filename)
+int solve_2019_15(char *input_filename, int part)
 {
+    assert(part == 1 || part == 2);
+
     Intcode_t program;
     int program_length = read_intcode(&program, input_filename);
     assert(program_length > 0);
@@ -153,15 +155,41 @@ long solve_2019_15_1(char *input_filename)
         for (int c = 0; c < MAP_SIDELEN; ++c)
         {
             dists[r][c] = MAP_SIDELEN * MAP_SIDELEN;
-            if (r == MAP_SIDELEN / 2 && c == MAP_SIDELEN / 2)
+            if (part == 1 && r == MAP_SIDELEN / 2 && c == MAP_SIDELEN / 2)
+            {
+                dists[r][c] = 0;
+            }
+            else if (part == 2 && r == ox_row && c == ox_col)
             {
                 dists[r][c] = 0;
             }
         }
     }
 
-    // find shortest distance to each square from the start point
-    shortest_dists(map, dists, MAP_SIDELEN / 2, MAP_SIDELEN / 2);
+    if (part == 1)
+    {
+        // find shortest distance to each square from the start point
+        shortest_dists(map, dists, MAP_SIDELEN / 2, MAP_SIDELEN / 2);
+        return dists[ox_row][ox_col];
+    }
+    else // part == 2
+    {
+        // find shortest distance to each square from the ox system
+        shortest_dists(map, dists, ox_row, ox_col);
 
-    return dists[ox_row][ox_col];
+        // find the largest shortest distance
+        int max_dist = 0;
+        for (int r = 0; r < MAP_SIDELEN; ++r)
+        {
+            for (int c = 0; c < MAP_SIDELEN; ++c)
+            {
+                if (map[r][c] == EMPTY)
+                {
+                    max_dist = max(max_dist, dists[r][c]);
+                }
+            }
+        }
+
+        return max_dist;
+    }
 }

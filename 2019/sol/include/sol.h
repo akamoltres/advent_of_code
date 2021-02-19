@@ -44,7 +44,7 @@ long solve_2019_13_2(char const *input_filename);
 long solve_2019_14_1(char const *input_filename);
 long solve_2019_14_2(char const *input_filename);
 
-long solve_2019_15_1(char const *input_filename);
+int solve_2019_15(char const *input_filename, int part);
 
 #ifdef __cplusplus
 }
