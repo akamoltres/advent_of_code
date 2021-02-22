@@ -46,6 +46,8 @@ long solve_2019_14_2(char const *input_filename);
 
 int solve_2019_15(char const *input_filename, int part);
 
+int solve_2019_16_1(char const *input_filename, int phases);
+
 #ifdef __cplusplus
 }
 #endif
