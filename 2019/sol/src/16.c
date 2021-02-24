@@ -7,7 +7,7 @@
 #define MAX_STR_SIZE 1000
 
 #define PATTERN_LENGTH 4
-long pattern[PATTERN_LENGTH] = {0, 1, 0, -1};
+int pattern[PATTERN_LENGTH] = {0, 1, 0, -1};
 
 int solve_2019_16_1(char const *input_filename, int phases)
 {
@@ -23,8 +23,8 @@ int solve_2019_16_1(char const *input_filename, int phases)
     assert(len < MAX_STR_SIZE);
 
     // convert to ints
-    long list1[MAX_STR_SIZE];
-    memset(list1, 0, len * sizeof(long));
+    int list1[MAX_STR_SIZE];
+    memset(list1, 0, len * sizeof(int));
     for (int i = 0; i < len; ++i)
     {
         list1[i] = input_buffer[i] - '0';
@@ -33,12 +33,11 @@ int solve_2019_16_1(char const *input_filename, int phases)
     // iterate through the phases
     for (int p = 0; p < phases; ++p)
     {
-        long list2[MAX_STR_SIZE];
-        memset(list2, 0, len * sizeof(long));
+        int list2[MAX_STR_SIZE];
+        memset(list2, 0, len * sizeof(int));
         for (int i = 0; i < len; ++i)
         {
             // build the pattern
-            int applied_pattern[MAX_STR_SIZE];
             int idx = 0;
             bool first = true;
             while (idx < len)
@@ -53,7 +52,7 @@ int solve_2019_16_1(char const *input_filename, int phases)
                         }
                         else
                         {
-                            applied_pattern[idx++] = pattern[j];
+                            list2[i] += list1[idx++] * pattern[j];
                             if (idx == len)
                             {
                                 break;
@@ -66,19 +65,13 @@ int solve_2019_16_1(char const *input_filename, int phases)
                     }
                 }
             }
-
-            // apply the pattern
-            for (int j = 0; j < len; ++j)
-            {
-                list2[i] += list1[j] * applied_pattern[j];
-            }
             if (list2[i] < 0)
             {
                 list2[i] *= -1;
             }
             list2[i] %= 10;
         }
-        memcpy(list1, list2, len * sizeof(long));
+        memcpy(list1, list2, len * sizeof(int));
     }
 
     // build eight digit output
@@ -89,4 +82,9 @@ int solve_2019_16_1(char const *input_filename, int phases)
     }
 
     return output;
+}
+
+int solve_2019_16_2(char const *input_filename, int phases)
+{
+    return -1;
 }

@@ -45,3 +45,21 @@ TEST(DAY_16, TEST_3)
     int part1 = solve_2019_16_1("input/16_test3.txt", 100);
     CHECK_EQUAL(52432133, part1);
 }
+
+TEST(DAY_16, TEST_4)
+{
+    int part2 = solve_2019_16_2("input/16_test4.txt", 100);
+    CHECK_EQUAL(84462026, part2);
+}
+
+TEST(DAY_16, TEST_5)
+{
+    int part2 = solve_2019_16_2("input/16_test5.txt", 100);
+    CHECK_EQUAL(78725270, part2);
+}
+
+TEST(DAY_16, TEST_6)
+{
+    int part2 = solve_2019_16_2("input/16_test6.txt", 100);
+    CHECK_EQUAL(53553731, part2);
+}
